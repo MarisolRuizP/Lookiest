@@ -2,10 +2,11 @@ package ruiz.marisol.lookiest.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val Blanco = Color(0xFFFFFFFF)
+val BlancoFondo = Color(0xFFEDEDF4)
+val Azul = Color(0xFF0C6291)
+val Azul50 = Color(0x800C6291)
+val Negro = Color(0xFF000004)
+val Amarillo = Color(0xFFD8973C)
+val Rosa = Color(0xFFA73266)
+val Rosa50 = Color(0x80A73266)

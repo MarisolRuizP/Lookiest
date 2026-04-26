@@ -1,10 +1,27 @@
 package ruiz.marisol.lookiest.viewModel
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.data.PrendaRopa
 
 class ClosetViewModel : ViewModel() {
+
+    private val _tallas = listOf("XS", "S", "M", "L", "XL", "XXL")
+    private val _categorias = listOf("Top", "Bottom", "OuterWear", "BodySuit", "Zapatos", "Accesorios")
+    private val _tags = listOf("Leather", "Denim", "Pleated", "Knit", "Floral", "Lace")
+    private val _temporadas = listOf("Primavera", "Verano", "Otoño", "Invierno")
+    private val _formalidades = listOf("Casual", "Formal", "Deportivo")
+
+    private val _opcionesColores = listOf("Rojo" to Color.Red, "Azul" to Color.Blue, "Verde" to Color.Green, "Negro" to Color.Black)
+
+    // Getters públicos (los que usará tu UI)
+    val tallas get() = _tallas
+    val categorias get() = _categorias
+    val tags get() = _tags
+    val temporadas get() = _temporadas
+    val formalidades get() = _formalidades
+    val colores get() = _opcionesColores
 
     private val items = mutableListOf(
         PrendaRopa(
@@ -36,6 +53,7 @@ class ClosetViewModel : ViewModel() {
     )
 
     val prendas: List<PrendaRopa> get() = items
+
 
     fun favorito(id: Int) {
         val index = items.indexOfFirst { it.id == id }
