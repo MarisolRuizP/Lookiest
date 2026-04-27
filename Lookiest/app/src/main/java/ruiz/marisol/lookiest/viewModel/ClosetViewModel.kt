@@ -1,8 +1,12 @@
 package ruiz.marisol.lookiest.viewModel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import ruiz.marisol.lookiest.R
+import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
 
 class ClosetViewModel : ViewModel() {
