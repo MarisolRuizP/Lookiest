@@ -70,4 +70,19 @@ class ClosetViewModel : ViewModel() {
         items.removeIf { it.id == id }
     }
 
+    var outfits by mutableStateOf(listOf<Outfit>()) // lista de outfits
+        private set
+
+    fun agregarOutfit(outfit: Outfit) {
+        outfits = outfits + outfit.copy(id = outfits.size + 1)
+    }
+
+    fun eliminarOutfit(id: Int) {
+        outfits = outfits.filter { it.id != id }
+    }
+
+    fun actualizarOutfit(outfitActualizado: Outfit) {
+        outfits = outfits.map { if (it.id == outfitActualizado.id) outfitActualizado else it }
+    }
+
 }
