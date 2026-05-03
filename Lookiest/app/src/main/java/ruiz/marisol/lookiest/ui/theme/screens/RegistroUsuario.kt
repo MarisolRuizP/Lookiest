@@ -1,5 +1,6 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,13 +53,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.ui.theme.components.CampoRegistro
+import ruiz.marisol.lookiest.viewModel.AuthViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroScreen(){
+fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit){
     var user by remember { mutableStateOf("") }
     var nombres by remember { mutableStateOf("") }
     var apellidos by remember { mutableStateOf("") }
@@ -233,7 +235,12 @@ fun RegistroScreen(){
 
         Spacer(modifier = Modifier.height(10.dp))
         Button(
-            onClick = { },
+            onClick = {
+                if (user.isNotEmpty() && pass.isNotEmpty() && pass == confirmarPass) {
+                    viewModel.login(user,pass)
+                    onRegistrationComplete()
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(49.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(id = R.color.mustard_yellow)
@@ -244,9 +251,9 @@ fun RegistroScreen(){
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun RegistroScreenPreview(){
-    RegistroScreen()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun RegistroScreenPreview(){
+//    RegistroScreen()
+//}
 

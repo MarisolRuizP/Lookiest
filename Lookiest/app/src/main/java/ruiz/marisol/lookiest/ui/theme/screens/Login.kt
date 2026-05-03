@@ -1,5 +1,6 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,13 +25,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -40,16 +44,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ruiz.marisol.lookiest.R
+import ruiz.marisol.lookiest.data.DataStoreManager
+import ruiz.marisol.lookiest.viewModel.AuthViewModel
 
 @Composable
 fun LoginScreen(
-
+    viewModel: AuthViewModel,
+    onNavigateToRegister: () -> Unit,
+    onLoginSuccess: () -> Unit
 ){
+    val userName by viewModel.username.collectAsState()
+    val isRegistered by viewModel.isLoggedIn.collectAsState()
+    val password by viewModel.password.collectAsState()
+
+    val context = LocalContext.current
     var user by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
     var passVisible by remember { mutableStateOf(false) }
@@ -108,39 +122,42 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(30.dp))
 
         Text(
-            text = "Inicio de sesión",
+            text = if (isRegistered) "Bienvenido de vuelta\n$userName" else "Iniciar Sesión",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 30.sp
+            fontSize = 30.sp,
+            textAlign = TextAlign.Center,
+            color = if (isRegistered) Color(0xFFA63968) else Color.Black
         )
         Spacer(modifier = Modifier.height(60.dp))
 
-        Text(
-            modifier = Modifier
-                .align(Alignment.Start),
-            fontSize = 16.sp,
-            fontFamily = FontFamily.Monospace,
-            text = "Usuario"
-        )
+        if (!isRegistered) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Start),
+                fontSize = 16.sp,
+                fontFamily = FontFamily.Monospace,
+                text = "Usuario"
+            )
 
-        TextField(
-            value = user,
-            onValueChange = { user = it },
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(15.dp))
+            TextField(
+                value = user,
+                onValueChange = { user = it },
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    disabledContainerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(15.dp))
+        }
 
         Text(
             modifier = Modifier
@@ -153,14 +170,13 @@ fun LoginScreen(
             value = pass,
             onValueChange = { pass = it },
             shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
                 disabledContainerColor = Color.White,
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
             ),
             singleLine = true,
             visualTransformation = if (passVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -173,13 +189,14 @@ fun LoginScreen(
             }
         )
 
-
         Spacer(modifier = Modifier.height(28.dp))
 
         Text(
             modifier = Modifier
                 .align(Alignment.End)
-                .clickable{ },
+                .clickable{
+                    //Acción
+                },
             fontSize = 12.sp,
             text = "Olvidaste tu contraseña?",
         )
@@ -187,7 +204,21 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
-            onClick = { },
+            onClick = {
+                if (pass.isBlank()) {
+                    Toast.makeText(context, "Por favor, escribe tu contraseña", Toast.LENGTH_SHORT).show()
+                }
+
+                else if (isRegistered) {
+                    if (pass == password) {
+                        onLoginSuccess()
+                    } else {
+                        Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(context, "No tienes cuenta. Dale a Registrarme", Toast.LENGTH_SHORT).show()
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(49.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(id = R.color.mustard_yellow)
@@ -195,21 +226,32 @@ fun LoginScreen(
         ) { Text(
             fontSize = 17.sp,
             text = "Ingresar") }
+
         Spacer(modifier = Modifier.height(10.dp))
+
         Button(
-            onClick = { },
+            onClick = {
+                if (isRegistered) {
+                    // Lógica de biometría para huella dactilar
+                } else {
+                    onNavigateToRegister()
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(49.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(id = R.color.azul)
             )
-        ) { Text(
-            fontSize = 17.sp,
-            text = "Registrarme") }
+        ) {
+            Text(
+                fontSize = 17.sp,
+                text = if (isRegistered) "Usar huella" else "Registrarme"
+            )
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview(){
-    LoginScreen()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LoginScreenPreview(){
+//    LoginScreen(viewModel = AuthViewModel(DataStoreManager(LocalContext.current)))
+//}

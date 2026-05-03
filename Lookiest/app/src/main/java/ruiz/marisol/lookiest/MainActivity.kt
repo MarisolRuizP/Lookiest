@@ -11,20 +11,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import ruiz.marisol.lookiest.data.DataStoreManager
+import ruiz.marisol.lookiest.navigation.AppNavigation
 import ruiz.marisol.lookiest.ui.theme.LookiestTheme
+import ruiz.marisol.lookiest.viewModel.AuthViewModel
+import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val authViewModel = AuthViewModel(DataStoreManager(this))
+        val closetViewModel = ClosetViewModel()
+
         setContent {
             LookiestTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNavigation(authViewModel, closetViewModel)
             }
         }
     }
