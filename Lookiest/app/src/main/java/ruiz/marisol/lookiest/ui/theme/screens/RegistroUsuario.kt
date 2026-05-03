@@ -238,6 +238,7 @@ fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit)
             onClick = {
                 if (user.isNotEmpty() && pass.isNotEmpty() && pass == confirmarPass) {
                     viewModel.login(user,pass)
+                    //Se guardaría en la BD?
                     onRegistrationComplete()
                 }
             },

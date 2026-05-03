@@ -29,10 +29,8 @@ class AuthViewModel(private val dataStore: DataStoreManager) : ViewModel() {
     )
 
     fun login(user: String, pass: String) {
-        if (user == "admin" && pass == "1234") {
-            viewModelScope.launch {
-                dataStore.saveSession(user, pass)
-            }
+        viewModelScope.launch {
+            dataStore.saveSession(user, pass)
         }
     }
 
