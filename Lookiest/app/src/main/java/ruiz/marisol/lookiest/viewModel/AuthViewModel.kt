@@ -39,4 +39,17 @@ class AuthViewModel(private val dataStore: DataStoreManager) : ViewModel() {
             dataStore.logout()
         }
     }
+
+    fun updateProfile(nuevoUsuario: String, nuevoNombre: String, nuevoCorreo: String) {
+        viewModelScope.launch {
+            // Suponiendo que tu DataStoreManager tiene una función para editar estos campos
+            //dataStore.updateUserData(nuevoUsuario, nuevoNombre, nuevoCorreo)
+        }
+    }
+
+    fun updatePassword(nuevaPass: String) {
+        viewModelScope.launch {
+            dataStore.saveSession(username.value, nuevaPass)
+        }
+    }
 }

@@ -71,10 +71,14 @@ fun DetallesOutfitScreen(
                     fontSize = 18.sp
                 )
                 Row {
-                    IconButton(onClick = {// falta lo de favoritos }) {
+                    IconButton(onClick = {
+                        // falta lo de favoritos
+                        }) {
                         Icon(Icons.Outlined.FavoriteBorder, contentDescription = "Favorito", tint = Rosa)
                     }
-                    IconButton(onClick = { //tambien esto de compartit }) {
+                    IconButton(onClick = {
+                        //tambien esto de compartit
+                        }) {
                         Icon(Icons.Default.Share, contentDescription = "Compartir", tint = Amarillo)
                     }
                 }

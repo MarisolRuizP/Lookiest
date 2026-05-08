@@ -7,8 +7,11 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ruiz.marisol.lookiest.ui.theme.screens.CambiarContraScreen
 import ruiz.marisol.lookiest.ui.theme.screens.ClosetScreen
+import ruiz.marisol.lookiest.ui.theme.screens.EditarPerfilScreen
 import ruiz.marisol.lookiest.ui.theme.screens.LoginScreen
+import ruiz.marisol.lookiest.ui.theme.screens.PerfilScreen
 import ruiz.marisol.lookiest.ui.theme.screens.RegistroScreen
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
@@ -18,6 +21,9 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Registro : Screen("registro")
     object MiCloset : Screen("mi_closet")
+    object Perfil : Screen("perfil")
+    object EditarPerfil : Screen ("editar_perfil")
+    object CambiarContra : Screen("cambiar_contra")
 }
 
 @Composable
@@ -62,6 +68,33 @@ fun AppNavigation(
         composable(Screen.MiCloset.route) {
             ClosetScreen(
                 closetViewModel
+            )
+        }
+
+        composable(Screen.Perfil.route) {
+            PerfilScreen(
+                viewModel = viewModel,
+                onNavigateToEdit = { navController.navigate("editar_perfil") },
+                onNavigateToChangePass = { navController.navigate("cambiar_contra") },
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0)
+                    }
+                }
+            )
+        }
+
+        composable(Screen.EditarPerfil.route) {
+            EditarPerfilScreen(
+                viewModel = viewModel,
+                onNavigateBack = {navController.navigate("perfil")}
+            )
+        }
+
+        composable(Screen.CambiarContra.route) {
+            CambiarContraScreen(
+                viewModel = viewModel,
+                onNavigateBack = {navController.navigate("perfil")}
             )
         }
     }
