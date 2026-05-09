@@ -27,7 +27,7 @@ class ClosetViewModel : ViewModel() {
     val formalidades get() = _formalidades
     val colores get() = _opcionesColores
 
-    private val items = mutableListOf(
+    var prendas by mutableStateOf(listOf(
         PrendaRopa(
             id = 1,
             nombre = "Chaqueta roja de vinipiel",
@@ -54,24 +54,23 @@ class ClosetViewModel : ViewModel() {
             formalidad = "Casual",
             imagen = R.drawable.falda_roja
         )
-    )
-
-    val prendas: List<PrendaRopa> get() = items
+    ))
+        private set
 
 
     fun favorito(id: Int) {
-        val index = items.indexOfFirst { it.id == id }
-        if (index != -1) {
-            items[index] = items[index].copy(favorito = !items[index].favorito)
+        prendas = prendas.map { prenda ->
+            if (prenda.id == id) prenda.copy(favorito = !prenda.favorito)
+            else prenda
         }
     }
 
     fun agregarPrenda(prenda: PrendaRopa) {
-        items.add(prenda)
+        prendas = prendas + prenda
     }
 
     fun eliminarPrenda(id: Int) {
-        items.removeIf { it.id == id }
+        prendas = prendas.filter { it.id != id }
     }
 
     var outfits by mutableStateOf(listOf<Outfit>()) // lista de outfits
@@ -83,7 +82,7 @@ class ClosetViewModel : ViewModel() {
         esPublico: Boolean,
         etiquetas: List<String>
     ) {
-        val prendasDelOutfit = items.filter { it.id in prendasIds }
+        val prendasDelOutfit = prendas.filter { it.id in prendasIds }
         outfits = outfits + Outfit(
             id        = outfits.size + 1,
             nombre    = nombre,
@@ -105,7 +104,7 @@ class ClosetViewModel : ViewModel() {
         esPublico: Boolean,
         etiquetas: List<String>
     ) {
-        val prendasDelOutfit = items.filter { it.id in prendasIds }
+        val prendasDelOutfit = prendas.filter { it.id in prendasIds }
         outfits = outfits.map { o ->
             if (o.id == outfitId)
                 o.copy(
@@ -118,6 +117,4 @@ class ClosetViewModel : ViewModel() {
         }
     }
     fun getOutfitById(id: Int): Outfit? = outfits.find { it.id == id }
-}
-
 }
