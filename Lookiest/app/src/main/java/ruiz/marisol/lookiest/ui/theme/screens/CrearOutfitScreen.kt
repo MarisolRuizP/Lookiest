@@ -28,6 +28,8 @@ import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.ui.theme.*
 import ruiz.marisol.lookiest.ui.theme.components.*
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
+
+
 @Composable
 fun CrearOutfitScreen(
     viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
