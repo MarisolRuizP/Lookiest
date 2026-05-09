@@ -38,8 +38,8 @@ fun DetallesOutfitScreen(
 
     if (mostrarDialogoEliminar) {
         ConfirmacionDialog(
-            mensaje = "¿Deseas eliminar este outfit?",
-            onCancelar = { mostrarDialogoEliminar = false },
+            mensaje     = "¿Deseas eliminar este outfit?",
+            onCancelar  = { mostrarDialogoEliminar = false },
             onConfirmar = {
                 mostrarDialogoEliminar = false
                 viewModel.eliminarOutfit(outfit.id)
@@ -49,7 +49,7 @@ fun DetallesOutfitScreen(
     }
 
     Scaffold(
-        topBar = { LookiestTopBar() },
+        topBar    = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(selected = 1) },
         containerColor = BlancoFondo
     ) { padding ->
@@ -59,77 +59,85 @@ fun DetallesOutfitScreen(
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header con título y acciones
+            // Encabezado
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment     = Alignment.CenterVertically
             ) {
-                Text(
-                    "Detalles del Outfit",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
+                Text("Detalles del Outfit", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Row {
-                    IconButton(onClick = {
-                        // falta lo de favoritos
-                        }) {
+                    IconButton(onClick = { /* TODO: toggle favorito outfit */ }) {
                         Icon(Icons.Outlined.FavoriteBorder, contentDescription = "Favorito", tint = Rosa)
                     }
-                    IconButton(onClick = {
-                        //tambien esto de compartit
-                        }) {
+                    IconButton(onClick = { /* TODO: compartir outfit */ }) {
                         Icon(Icons.Default.Share, contentDescription = "Compartir", tint = Amarillo)
                     }
                 }
             }
 
-            // Creado por
             Text(
-                text = "Creado por ${outfit.creadoPor}",
-                fontSize = 12.sp,
+                text      = "Creado por ${outfit.creadoPor}",
+                fontSize  = 12.sp,
                 fontStyle = FontStyle.Italic,
-                color = Rosa,
-                modifier = Modifier.padding(bottom = 8.dp)
+                color     = Rosa,
+                modifier  = Modifier.padding(bottom = 8.dp)
             )
 
-            // Chips de info del outfit
+            // Chips de info
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                InfoChip(if (outfit.esPublico) "Público" else "Privado", Azul50, Negro)
-                outfit.etiquetas.forEach { tag -> InfoChip(tag, Azul50, Negro) }
+                InfoChip(
+                    texto   = if (outfit.esPublico) "Público" else "Privado",
+                    bgColor = Azul50,
+                    textColor = Negro
+                )
+                outfit.etiquetas.forEach { tag ->
+                    InfoChip(texto = tag, bgColor = Azul50, textColor = Negro)
+                }
             }
 
+            // Estadística de uso
+            Spacer(Modifier.height(14.dp))
+            EstadisticaRow(label = "Total de usos", valor = outfit.totalUsos)
             Spacer(Modifier.height(14.dp))
 
-            // Lista de prendas del outfit
-            outfit.prendas.forEach { prenda ->
-                PrendaOutfitRow(prenda = prenda)
-                Spacer(Modifier.height(8.dp))
+            // Lista de prendas
+            if (outfit.prendas.isEmpty()) {
+                Box(
+                    modifier         = Modifier.fillMaxWidth().height(80.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Sin prendas asignadas", color = Color.Gray, fontSize = 14.sp)
+                }
+            } else {
+                outfit.prendas.forEach { prenda ->
+                    PrendaOutfitRow(prenda = prenda)
+                    Spacer(Modifier.height(8.dp))
+                }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            // Botones Eliminar / Editar
+            // Botones
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Button(
-                    onClick = { mostrarDialogoEliminar = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = Rosa),
-                    shape = RoundedCornerShape(50),
+                    onClick  = { mostrarDialogoEliminar = true },
+                    colors   = ButtonDefaults.buttonColors(containerColor = Rosa),
+                    shape    = RoundedCornerShape(50),
                     modifier = Modifier.weight(1f).height(48.dp)
-                ) {
-                    Text("Eliminar", fontWeight = FontWeight.Bold)
-                }
+                ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+
                 Button(
-                    onClick = onEditar,
-                    colors = ButtonDefaults.buttonColors(containerColor = Amarillo),
-                    shape = RoundedCornerShape(50),
+                    onClick  = onEditar,
+                    colors   = ButtonDefaults.buttonColors(containerColor = Amarillo),
+                    shape    = RoundedCornerShape(50),
                     modifier = Modifier.weight(1f).height(48.dp)
-                ) {
-                    Text("Editar", fontWeight = FontWeight.Bold)
-                }
+                ) { Text("Editar", fontWeight = FontWeight.Bold) }
             }
 
             Spacer(Modifier.height(20.dp))
@@ -140,12 +148,12 @@ fun DetallesOutfitScreen(
 @Composable
 fun PrendaOutfitRow(prenda: PrendaRopa) {
     Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape    = RoundedCornerShape(14.dp),
+        colors   = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier          = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -156,26 +164,51 @@ fun PrendaOutfitRow(prenda: PrendaRopa) {
             ) {
                 if (prenda.imagen != null) {
                     Image(
-                        painter = painterResource(id = prenda.imagen),
+                        painter            = painterResource(id = prenda.imagen),
                         contentDescription = prenda.nombre,
-                        modifier = Modifier.fillMaxSize().padding(4.dp),
-                        contentScale = ContentScale.Fit
+                        modifier           = Modifier.fillMaxSize().padding(4.dp),
+                        contentScale       = ContentScale.Fit
                     )
                 } else {
                     Icon(
                         Icons.Default.Checkroom,
                         contentDescription = null,
-                        tint = Color.LightGray,
+                        tint     = Color.LightGray,
                         modifier = Modifier.size(32.dp)
                     )
                 }
             }
             Spacer(Modifier.width(12.dp))
-            Text(
-                prenda.nombre,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp
-            )
+            Column {
+                Text(prenda.nombre,    fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                Text(prenda.categoria, fontSize = 12.sp, color = Color.Gray)
+            }
         }
+    }
+}
+
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun PreviewDetallesOutfit() {
+    val prendasMock = listOf(
+        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara",     talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
+        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",          talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
+    )
+    val outfitMock = Outfit(
+        id        = 1,
+        nombre    = "Look Rojo Otoñal",
+        prendas   = prendasMock,
+        esPublico = false,
+        etiquetas = listOf("Casual", "Otoño", "Rojo", "Inspo", "2026"),
+        creadoPor = "Mi (Marisol_Ruiz)",
+        totalUsos = 3
+    )
+    LookiestTheme {
+        DetallesOutfitScreen(
+            outfit   = outfitMock,
+            onEditar = {}
+        )
     }
 }
