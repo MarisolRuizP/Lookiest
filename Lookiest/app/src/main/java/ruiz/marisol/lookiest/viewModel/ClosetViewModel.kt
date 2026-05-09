@@ -19,7 +19,7 @@ class ClosetViewModel : ViewModel() {
 
     private val _opcionesColores = listOf("Rojo" to Color.Red, "Azul" to Color.Blue, "Verde" to Color.Green, "Negro" to Color.Black)
 
-    // Getters públicos (los que usará tu UI)
+    // Getters públicos
     val tallas get() = _tallas
     val categorias get() = _categorias
     val tags get() = _tags

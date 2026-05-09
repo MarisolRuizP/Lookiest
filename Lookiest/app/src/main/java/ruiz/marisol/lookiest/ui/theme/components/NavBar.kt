@@ -14,7 +14,7 @@ import ruiz.marisol.lookiest.ui.theme.Rosa50
 fun LookiestBottomBar(selected: Int = 2) {
     val items = listOf(
         "Outfits" to Icons.Default.Checkroom,
-        "Nuevo Outfit" to Icons.Default.AddCircle,
+        "Outfit de Hoy" to Icons.Default.CalendarToday,
         "Inicio" to Icons.Default.Home,
         "Mi Calendario" to Icons.Default.CalendarMonth,
         "Perfil" to Icons.Default.Person
