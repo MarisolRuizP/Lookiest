@@ -11,6 +11,6 @@ data class PrendaRopa (
     val tags: List<String> = emptyList(),
     val temporada: List<String> = emptyList(),
     val formalidad: String,
-    val imagen: Int? = null,
+    val imagen: String? = null,
     val favorito: Boolean = false
 )

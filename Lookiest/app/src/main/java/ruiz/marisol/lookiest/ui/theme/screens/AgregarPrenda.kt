@@ -1,5 +1,10 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -23,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,6 +47,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,11 +56,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
@@ -67,6 +78,16 @@ import ruiz.marisol.lookiest.ui.theme.components.LookiestTextField
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
 import ruiz.marisol.lookiest.ui.theme.components.SelectorMultiple
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
+import java.io.File
+
+
+fun Context.createImageFile(): File {
+    return File.createTempFile(
+        "JPEG_${System.currentTimeMillis()}_",
+        ".jpg",
+        externalCacheDir
+    )
+}
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -76,6 +97,8 @@ fun AgregarPrendaScreen(
     onDescartado: () -> Unit = {},
     navController: NavController
 ) {
+
+    val context = LocalContext.current
 
     // estados
     var nombre by remember { mutableStateOf("") }
@@ -99,6 +122,63 @@ fun AgregarPrendaScreen(
     val formalidades = viewModel.formalidades
     val colores = viewModel.colores
 
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+    var mostrarMenuFoto by remember { mutableStateOf(false) }
+
+    // Lanzador para la galeria
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            imageUri = uri
+        }
+    }
+
+    // Lanzador para la camara
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            imageUri = tempImageUri
+        }
+    }
+
+    if (mostrarMenuFoto) {
+        AlertDialog(
+            onDismissRequest = { mostrarMenuFoto = false },
+            title = { Text("Agregar foto") },
+            text = { Text("¿Desde dónde quieres agregar la foto de la prenda?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    mostrarMenuFoto = false
+                    // Preparamos la URI temporal y lanzamos la cámara
+                    val file = context.createImageFile()
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        file
+                    )
+                    tempImageUri = uri
+                    cameraLauncher.launch(uri)
+                }) {
+                    Text("Cámara", color = Rosa)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    mostrarMenuFoto = false
+                    // Lanzamos el Photo Picker de la galería
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }) {
+                    Text("Galería", color = Rosa)
+                }
+            }
+        )
+    }
+
     // dialogo de confirmacion
     if (mostrarDialogoGuardar) {
         ConfirmacionDialog(
@@ -119,7 +199,7 @@ fun AgregarPrendaScreen(
                     tags = tagsSeleccionadas.toList(),
                     temporada = temporadasSeleccionadas.toList(),
                     formalidad = formalidad,
-                    imagen = null, // va la url d la imagen
+                    imagen = imageUri?.toString(), // va la url d la imagen
                     favorito = false
                 )
 
@@ -156,29 +236,40 @@ fun AgregarPrendaScreen(
                     .height(250.dp)
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xFFF0EEF0)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Checkroom,
-                            contentDescription = null,
-                            modifier = Modifier.size(72.dp),
-                            tint = Color.LightGray
+                    if (imageUri != null) {
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = "Foto de la prenda",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFFF0EEF0)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Checkroom,
+                                contentDescription = null,
+                                modifier = Modifier.size(72.dp),
+                                tint = Color.LightGray
+                            )
+                        }
                     }
 
                     IconButton(
-                        onClick = { /* Abrir galería/cámara */ },
-                        modifier = Modifier.align(Alignment.BottomEnd)
-                    ) {
+                        onClick = { mostrarMenuFoto = true },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                            .background(Color.White.copy(alpha = 0.7f), CircleShape)
+                    ){
                         Icon(
                             Icons.Default.CameraAlt,
                             contentDescription = "Agregar foto",
                             tint = Color.DarkGray
-                            // aqui abre la camara
                         )
                     }
                 }

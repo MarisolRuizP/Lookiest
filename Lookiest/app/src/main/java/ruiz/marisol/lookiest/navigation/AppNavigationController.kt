@@ -119,7 +119,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("prendaId") { type = NavType.IntType })
         ) { backStackEntry ->
             val prendaId = backStackEntry.arguments?.getInt("prendaId") ?: return@composable
-            val prenda   = closetViewModel.prendas.find { it.id == prendaId } ?: return@composable
+            val prenda = closetViewModel.prendas.find { it.id == prendaId } ?: return@composable
 
             EditarPrendaScreen(
                 prendaInicial = prenda,
@@ -134,7 +134,7 @@ fun AppNavigation(
         composable(Screen.MisOutfits.route) {
             OutfitsScreen(
                 viewModel = closetViewModel,
-                navController = navController,          // ← agregar
+                navController = navController,
                 onOutfitClick = { outfit ->
                     navController.navigate(Screen.DetallesOutfit.createRoute(outfit.id))
                 },

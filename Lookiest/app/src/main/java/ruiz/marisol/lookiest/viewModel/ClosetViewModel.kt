@@ -39,7 +39,8 @@ class ClosetViewModel : ViewModel() {
             tags = listOf("Leather"),
             temporada = listOf("Otoño", "Invierno"),
             formalidad = "Casual",
-            imagen = R.drawable.chaqueta_roja
+            imagen = "android.resource://ruiz.marisol.lookiest/${R.drawable.chaqueta_roja}",
+            favorito = true
         ),
         PrendaRopa(
             id = 2,
@@ -52,7 +53,8 @@ class ClosetViewModel : ViewModel() {
             tags = listOf("Pleated"),
             temporada = listOf("Primavera", "Verano"),
             formalidad = "Casual",
-            imagen = R.drawable.falda_roja
+            imagen = "android.resource://ruiz.marisol.lookiest/${R.drawable.camisa_blanca}",
+            favorito = false
         )
     ))
         private set
@@ -70,6 +72,11 @@ class ClosetViewModel : ViewModel() {
     fun eliminarPrenda(id: Int) {
         prendas = prendas.filter { it.id != id }
     }
+
+    fun actualizarPrenda(prendaActualizada: PrendaRopa) {
+        prendas = prendas.map { if (it.id == prendaActualizada.id) prendaActualizada else it }
+    }
+
     var outfits by mutableStateOf(listOf<Outfit>()) // lista de outfits
         private set
 
