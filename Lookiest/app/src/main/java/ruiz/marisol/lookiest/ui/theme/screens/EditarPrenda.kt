@@ -389,7 +389,7 @@ private fun PreviewEditarPrenda() {
         formalidad = "Casual",
         imagen = null
     )
-    
+
     LookiestTheme {
         EditarPrendaScreen(
             prendaInicial = prendaDePrueba,

@@ -18,6 +18,11 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Registro : Screen("registro")
     object MiCloset : Screen("mi_closet")
+    object MisOutfits : Screen("mis_outfits")
+    object ExplorarOutfits : Screen("explorar_outfits")
+    object AgregarPrenda : Screen("agregar_prenda")
+    object DetallesPrenda : Screen("detalles_prenda")
+    object EditarPrenda : Screen("editar_prenda")
 }
 
 @Composable
