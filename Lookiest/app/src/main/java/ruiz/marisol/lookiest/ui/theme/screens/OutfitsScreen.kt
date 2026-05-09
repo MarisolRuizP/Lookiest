@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.ui.theme.Amarillo
@@ -40,7 +41,8 @@ import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 fun OutfitsScreen(
     viewModel: ClosetViewModel,
     onOutfitClick: (Outfit) -> Unit = {},
-    onNuevoOutfit: () -> Unit = {}
+    onNuevoOutfit: () -> Unit = {},
+    navController: NavController
 ) {
     var tabSeleccionado by remember { mutableStateOf(0) } // 0 = Mis outfits  |  1 = Explorar
     var busqueda by remember { mutableStateOf("") }
@@ -60,7 +62,8 @@ fun OutfitsScreen(
 
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 0) },
+        bottomBar = { LookiestBottomBar(
+            selected = 0, navController) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNuevoOutfit,
@@ -95,7 +98,8 @@ fun OutfitsScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White,
-                    unfocusedBorderColor = Color.Transparent
+                    unfocusedBorderColor = Color.Transparent,
+
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -278,32 +282,3 @@ private fun EstadoVacio(mensaje: String) {
     }
 }
 
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewOutfits() {
-    val vm = ClosetViewModel().apply {
-        agregarOutfit(Outfit(id = 1, nombre = "Outfit otoño",  esPublico = false, creadoPor = "Mi",
-            prendas = listOf(
-                PrendaRopa(id = 1, nombre = "Chaqueta", talla = "M",  color = "Rojo",   estampado = false, categoria = "OuterWear", formalidad = "Casual"),
-                PrendaRopa(id = 2, nombre = "Falda",    talla = "XS", color = "Rojo",   estampado = true,  categoria = "Bottom",    formalidad = "Casual"),
-                PrendaRopa(id = 3, nombre = "Blusa",    talla = "S",  color = "Blanco", estampado = false, categoria = "Top",       formalidad = "Casual"),
-                PrendaRopa(id = 4, nombre = "Botas",    talla = "25", color = "Negro",  estampado = false, categoria = "Zapatos",   formalidad = "Casual"),
-            )
-        ))
-        agregarOutfit(Outfit(id = 2, nombre = "Look casual", esPublico = false, creadoPor = "Mi",
-            prendas = listOf(
-                PrendaRopa(id = 1, nombre = "Chaqueta", talla = "M",  color = "Rojo",  estampado = false, categoria = "OuterWear", formalidad = "Casual"),
-                PrendaRopa(id = 2, nombre = "Falda",    talla = "XS", color = "Rojo",  estampado = true,  categoria = "Bottom",    formalidad = "Casual"),
-            )
-        ))
-        agregarOutfit(Outfit(id = 3, nombre = "Look urbano", esPublico = true, creadoPor = "user_sofia",
-            prendas = listOf(
-                PrendaRopa(id = 1, nombre = "Blusa",  talla = "S",  color = "Blanco", estampado = false, categoria = "Top",    formalidad = "Formal"),
-                PrendaRopa(id = 2, nombre = "Jeans",  talla = "M",  color = "Azul",   estampado = false, categoria = "Bottom", formalidad = "Casual"),
-            )
-        ))
-    }
-    MaterialTheme { OutfitsScreen(viewModel = vm) }
-}

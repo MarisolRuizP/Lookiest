@@ -53,7 +53,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ruiz.marisol.lookiest.data.PrendaRopa
+import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
 import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.LookiestTheme
@@ -71,7 +73,8 @@ import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 fun AgregarPrendaScreen(
     viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onGuardado: () -> Unit = {},
-    onDescartado: () -> Unit = {}
+    onDescartado: () -> Unit = {},
+    navController: NavController
 ) {
 
     // estados
@@ -127,7 +130,8 @@ fun AgregarPrendaScreen(
     }
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 2) },
+        bottomBar = { LookiestBottomBar(
+            selected = 2, navController) },
         containerColor = BlancoFondo
     ) { padding ->
         Column(
@@ -418,13 +422,3 @@ fun AgregarPrendaScreen(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewAgregarPrenda() {
-    LookiestTheme {
-        AgregarPrendaScreen(
-            onGuardado = {},
-            onDescartado = {}
-        )
-    }
-}

@@ -23,7 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ruiz.marisol.lookiest.data.PrendaRopa
+import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
 import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.LookiestTheme
@@ -43,7 +45,8 @@ fun EditarPrendaScreen(
     prendaInicial: PrendaRopa,
     viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onGuardado: () -> Unit = {},
-    onDescartado: () -> Unit = {}
+    onDescartado: () -> Unit = {},
+    navController: NavController
 ) {
     var nombre by remember { mutableStateOf(prendaInicial.nombre) }
     var tienda by remember { mutableStateOf(prendaInicial.tienda) }
@@ -80,7 +83,8 @@ fun EditarPrendaScreen(
 
     Scaffold(
         topBar  = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 2) },
+        bottomBar = { LookiestBottomBar(
+            selected = 2, navController) },
         containerColor = BlancoFondo
     ) { padding ->
         Column(
@@ -372,29 +376,3 @@ fun EditarPrendaScreen(
 
 
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewEditarPrenda() {
-
-    val prendaDePrueba = PrendaRopa(
-        id = 1,
-        nombre = "Chaqueta de Vinipiel",
-        tienda = "Zara",
-        talla = "M",
-        color = "Rojo",
-        estampado = false,
-        categoria = "OuterWear",
-        tags = listOf("Leather"),
-        temporada = listOf("Otoño", "Invierno"),
-        formalidad = "Casual",
-        imagen = null
-    )
-
-    LookiestTheme {
-        EditarPrendaScreen(
-            prendaInicial = prendaDePrueba,
-            onGuardado = {},
-            onDescartado = {}
-        )
-    }
-}

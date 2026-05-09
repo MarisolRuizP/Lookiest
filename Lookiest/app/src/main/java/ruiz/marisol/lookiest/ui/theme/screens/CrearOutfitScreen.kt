@@ -23,8 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
+import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.*
 import ruiz.marisol.lookiest.ui.theme.components.*
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
@@ -33,7 +35,8 @@ import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 fun CrearOutfitScreen(
     viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onGuardar: () -> Unit = {},
-    onDescartar: () -> Unit = {}
+    onDescartar: () -> Unit = {},
+    navController: NavController
 ) {
     var busqueda by remember { mutableStateOf("") }
     var prendasSeleccionadas by remember { mutableStateOf(setOf<Int>()) } // IDs seleccionados
@@ -47,7 +50,8 @@ fun CrearOutfitScreen(
 
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 1) },
+        bottomBar = { LookiestBottomBar(
+            selected = 0, navController) },
         containerColor = BlancoFondo,
         floatingActionButton = {
             ExtendedFloatingActionButton(

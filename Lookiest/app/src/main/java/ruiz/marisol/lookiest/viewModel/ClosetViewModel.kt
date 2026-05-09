@@ -27,7 +27,7 @@ class ClosetViewModel : ViewModel() {
     val formalidades get() = _formalidades
     val colores get() = _opcionesColores
 
-    private val items = mutableListOf(
+    var prendas by mutableStateOf(listOf(
         PrendaRopa(
             id = 1,
             nombre = "Chaqueta roja de vinipiel",
@@ -54,26 +54,22 @@ class ClosetViewModel : ViewModel() {
             formalidad = "Casual",
             imagen = R.drawable.falda_roja
         )
-    )
-
-    val prendas: List<PrendaRopa> get() = items
-
+    ))
+        private set
 
     fun favorito(id: Int) {
-        val index = items.indexOfFirst { it.id == id }
-        if (index != -1) {
-            items[index] = items[index].copy(favorito = !items[index].favorito)
+        prendas = prendas.map {
+            if (it.id == id) it.copy(favorito = !it.favorito) else it
         }
     }
 
     fun agregarPrenda(prenda: PrendaRopa) {
-        items.add(prenda)
+        prendas = prendas + prenda
     }
 
     fun eliminarPrenda(id: Int) {
-        items.removeIf { it.id == id }
+        prendas = prendas.filter { it.id != id }
     }
-
     var outfits by mutableStateOf(listOf<Outfit>()) // lista de outfits
         private set
 

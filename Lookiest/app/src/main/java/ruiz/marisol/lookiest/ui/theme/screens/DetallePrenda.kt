@@ -22,7 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ruiz.marisol.lookiest.data.PrendaRopa
+import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
 import ruiz.marisol.lookiest.ui.theme.Azul
 import ruiz.marisol.lookiest.ui.theme.Azul50
@@ -45,7 +47,8 @@ fun DetallesPrendaScreen(
     prenda: PrendaRopa,
     viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onEditar: () -> Unit = {},
-    onEliminarConfirmado: () -> Unit = {}
+    onEliminarConfirmado: () -> Unit = {},
+    navController: NavController
 ) {
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
@@ -63,7 +66,8 @@ fun DetallesPrendaScreen(
 
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 2) },
+        bottomBar = { LookiestBottomBar(
+            selected = 2, navController) },
         containerColor = BlancoFondo
     ) { padding ->
         Column(
@@ -247,7 +251,7 @@ fun DetallesPrendaScreen(
 @Composable
 fun parseColor(colorName: String): Color {
     return when (colorName.lowercase()) {
-        "rojo" -> Color(0xFF802626) // El color vino de tu captura
+        "rojo" -> Color(0xFF802626)
         "azul" -> Color(0xFF0C6291)
         "negro" -> Color(0xFF000004)
         "amarillo" -> Color(0xFFD8973C)
@@ -257,28 +261,3 @@ fun parseColor(colorName: String): Color {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewDetalles() {
-    val prendaDePrueba = PrendaRopa(
-        id = 1,
-        nombre = "Chaqueta roja de vinipiel",
-        tienda = "Zara",
-        talla = "Mediana",
-        color = "Rojo",
-        estampado = false,
-        categoria = "OuterWear",
-        tags = listOf("Leather"),
-        temporada = listOf("Otoño", "Invierno"),
-        formalidad = "Casual",
-        imagen = null
-    )
-
-    LookiestTheme() {
-        DetallesPrendaScreen(
-            prenda = prendaDePrueba,
-            onEditar = {}
-
-        )
-    }
-}

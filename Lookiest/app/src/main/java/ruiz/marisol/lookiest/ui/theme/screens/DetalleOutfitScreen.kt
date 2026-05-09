@@ -27,8 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
+import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
 import ruiz.marisol.lookiest.ui.theme.Azul50
 import ruiz.marisol.lookiest.ui.theme.Blanco
@@ -39,16 +41,6 @@ import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 
-// ─────────────────────────────────────────────
-// COLORES
-// ─────────────────────────────────────────────
-private val ColorPrimary = Rosa
-private val ColorGold = Amarillo
-private val ColorSurface = BlancoFondo
-private val ColorCard = Blanco
-private val ColorCreador = Rosa
-private val ColorChipBg  = Azul50
-private val ColorChipText  = Negro
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -56,7 +48,9 @@ private val ColorChipText  = Negro
 fun DetalleOutfitScreen(
     outfit: Outfit,
     viewModel: ClosetViewModel,
-    onEliminar: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onEliminar: () -> Unit = {},
+    navController: NavController
 ) {
     // Estado local de likes / favorito
     var liked by remember { mutableStateOf(false) }
@@ -66,8 +60,9 @@ fun DetalleOutfitScreen(
 
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 0) },
-        containerColor = ColorSurface
+        bottomBar = { LookiestBottomBar(
+            selected = 0, navController) },
+        containerColor = BlancoFondo
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -118,7 +113,7 @@ fun DetalleOutfitScreen(
                                 text = outfit.creadoPor,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = ColorCreador,
+                                color = Rosa,
                                 fontFamily = FontFamily.Monospace
                             )
                         }
@@ -267,25 +262,4 @@ fun EtiquetaChip(texto: String) {
             fontWeight = FontWeight.Medium
         )
     }
-}
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewDetalleOutfit() {
-    val outfit = Outfit(
-        id         = 1,
-        nombre     = "Outfit otoño",
-        esPublico  = true,
-        creadoPor  = "Victoria.Villalba",
-        etiquetas  = listOf("Casual", "Otoño", "Rojo", "Inspo", "2026"),
-        prendas    = listOf(
-            PrendaRopa(1, "Chaqueta roja de vinipiel",      "Zara",  "M",  "Rojo",   false, "OuterWear", formalidad = "Casual"),
-            PrendaRopa(2, "Camisa manga corta de pinza",    "Zara",  "S",  "Blanco", false, "Top",       formalidad = "Casual"),
-            PrendaRopa(3, "Falda roja plisada",             "",      "XS", "Rojo",   true,  "Bottom",    formalidad = "Casual"),
-            PrendaRopa(4, "Botas cafés de vinipiel",        "Shein", "25", "Café",   false, "Zapatos",   formalidad = "Casual"),
-            PrendaRopa(5, "Diadema roja de terciopelo",     "",      "U",  "Rojo",   false, "Accesorios",formalidad = "Casual"),
-        )
-    )
-    MaterialTheme { DetalleOutfitScreen(outfit = outfit, viewModel = ClosetViewModel()) }
 }
