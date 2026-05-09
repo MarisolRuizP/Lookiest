@@ -77,16 +77,47 @@ class ClosetViewModel : ViewModel() {
     var outfits by mutableStateOf(listOf<Outfit>()) // lista de outfits
         private set
 
-    fun agregarOutfit(outfit: Outfit) {
-        outfits = outfits + outfit.copy(id = outfits.size + 1)
+    fun agregarOutfit(
+        nombre: String,
+        prendasIds: Set<Int>,
+        esPublico: Boolean,
+        etiquetas: List<String>
+    ) {
+        val prendasDelOutfit = items.filter { it.id in prendasIds }
+        outfits = outfits + Outfit(
+            id        = outfits.size + 1,
+            nombre    = nombre,
+            prendas   = prendasDelOutfit,
+            esPublico = esPublico,
+            etiquetas = etiquetas
+        )
     }
+
 
     fun eliminarOutfit(id: Int) {
         outfits = outfits.filter { it.id != id }
     }
 
-    fun actualizarOutfit(outfitActualizado: Outfit) {
-        outfits = outfits.map { if (it.id == outfitActualizado.id) outfitActualizado else it }
+    fun actualizarOutfit(
+        outfitId: Int,
+        nombre: String,
+        prendasIds: Set<Int>,
+        esPublico: Boolean,
+        etiquetas: List<String>
+    ) {
+        val prendasDelOutfit = items.filter { it.id in prendasIds }
+        outfits = outfits.map { o ->
+            if (o.id == outfitId)
+                o.copy(
+                    nombre    = nombre,
+                    prendas   = prendasDelOutfit,
+                    esPublico = esPublico,
+                    etiquetas = etiquetas
+                )
+            else o
+        }
     }
+    fun getOutfitById(id: Int): Outfit? = outfits.find { it.id == id }
+}
 
 }
