@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.ui.theme.Amarillo
@@ -44,11 +45,14 @@ fun OutfitsScreen(
     onNuevoOutfit: () -> Unit = {},
     navController: NavController
 ) {
-    var tabSeleccionado by remember { mutableStateOf(0) } // 0 = Mis outfits  |  1 = Explorar
+    val outfits by viewModel.outfits.collectAsState(initial = emptyList())
+    val todasLasPrendas by viewModel.prendas.collectAsState(initial = emptyList())
+
+    var tabSeleccionado by remember { mutableStateOf(0) }
     var busqueda by remember { mutableStateOf("") }
 
-    val misOutfits = viewModel.outfits.filter { it.creadoPor == "Mi" }
-    val explorar = viewModel.outfits.filter { it.esPublico && it.creadoPor != "Mi" }
+    val misOutfits = outfits.filter { it.creadoPor == "Mi" }
+    val explorar = outfits.filter { it.esPublico && it.creadoPor != "Mi" }
 
     val listaActual = if (tabSeleccionado == 0) misOutfits else explorar
 
@@ -56,7 +60,7 @@ fun OutfitsScreen(
         if (busqueda.isBlank()) listaActual
         else listaActual.filter { outfit ->
             outfit.nombre.contains(busqueda, ignoreCase = true) ||
-                    outfit.etiquetas.any { it.contains(busqueda, ignoreCase = true) }
+                    outfit.etiquetas.contains(busqueda, ignoreCase = true)
         }
     }
 
@@ -135,13 +139,14 @@ fun OutfitsScreen(
                 )
             } else {
                 LazyColumn(
-                    contentPadding  = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(listaFiltrada, key = { it.id }) { outfit ->
                         OutfitRow(
-                            outfit  = outfit,
+                            outfit = outfit,
+                            todasLasPrendas = todasLasPrendas,
                             onClick = { onOutfitClick(outfit) }
                         )
                     }
@@ -154,8 +159,12 @@ fun OutfitsScreen(
 @Composable
 fun OutfitRow(
     outfit: Outfit,
+    todasLasPrendas: List<PrendaRopa>,
     onClick: () -> Unit = {}
 ) {
+    val idsPrendas = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
+    val prendasDelOutfit = todasLasPrendas.filter { it.id in idsPrendas }
+
     Card(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = Blanco),
@@ -176,10 +185,9 @@ fun OutfitRow(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                outfit.prendas.take(5).forEach { prenda ->
+                prendasDelOutfit.take(5).forEach { prenda ->
                     PrendaMiniatura(prenda)
                 }
-
                 // Placeholder si el outfit no tiene prendas aún
                 if (outfit.prendas.isEmpty()) {
                     repeat(5) {
@@ -217,12 +225,12 @@ fun PrendaMiniatura(prenda: PrendaRopa) {
         modifier = Modifier.size(58.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (prenda.imagen != null) {
-            Image(
-                painter = painterResource(id = prenda.imagen),
+        if (!prenda.imagen.isNullOrEmpty()) {
+            AsyncImage(
+                model = prenda.imagen,
                 contentDescription = prenda.nombre,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Crop
             )
         } else {
             Icon(

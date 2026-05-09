@@ -92,7 +92,7 @@ fun Context.createImageFile(): File {
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AgregarPrendaScreen(
-    viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: ClosetViewModel,
     onGuardado: () -> Unit = {},
     onDescartado: () -> Unit = {},
     navController: NavController

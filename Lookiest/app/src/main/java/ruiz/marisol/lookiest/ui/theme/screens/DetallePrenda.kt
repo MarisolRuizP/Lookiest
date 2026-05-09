@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
@@ -45,7 +46,7 @@ import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 @Composable
 fun DetallesPrendaScreen(
     prenda: PrendaRopa,
-    viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: ClosetViewModel,
     onEditar: () -> Unit = {},
     onEliminarConfirmado: () -> Unit = {},
     navController: NavController
@@ -58,7 +59,7 @@ fun DetallesPrendaScreen(
             onCancelar = { mostrarDialogoEliminar = false },
             onConfirmar = {
                 mostrarDialogoEliminar = false
-                viewModel.eliminarPrenda(prenda.id)
+                viewModel.eliminarPrenda(prenda)
                 onEliminarConfirmado()
             }
         )
@@ -98,11 +99,14 @@ fun DetallesPrendaScreen(
 
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    if (prenda.imagen != null) {
-                        Image(
-                            painter = painterResource(id = prenda.imagen),
+                    // Usamos AsyncImage para leer el String (URI) de la base de datos
+                    if (!prenda.imagen.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = prenda.imagen,
                             contentDescription = prenda.nombre,
-                            modifier = Modifier.fillMaxSize() .padding(30.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(30.dp),
                             contentScale = ContentScale.Fit
                         )
                     } else {
@@ -112,7 +116,6 @@ fun DetallesPrendaScreen(
                                 .background(Color(0xFFF5F5F7))
                                 .padding(10.dp),
                             contentAlignment = Alignment.Center
-
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Checkroom,
@@ -124,7 +127,8 @@ fun DetallesPrendaScreen(
                     }
 
                     IconButton(
-                        onClick = { viewModel.favorito(prenda.id) },
+                        // Pasamos el objeto completo para cambiar el favorito en Room
+                        onClick = { viewModel.favorito(prenda) },
                         modifier = Modifier.align(Alignment.TopEnd)
                     ) {
                         Icon(
@@ -136,7 +140,6 @@ fun DetallesPrendaScreen(
                     }
                 }
             }
-
             Spacer(Modifier.height(12.dp))
 
 

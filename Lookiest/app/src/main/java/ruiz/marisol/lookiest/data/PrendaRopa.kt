@@ -1,7 +1,12 @@
 package ruiz.marisol.lookiest.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "prendas")
 data class PrendaRopa (
-    val id: Int,
+    @PrimaryKey(true)
+    val id: Int = 0,
     val nombre: String,
     val tienda: String = "",
     val talla: String,

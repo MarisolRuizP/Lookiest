@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.navigation.Screen
@@ -51,12 +52,20 @@ fun DetalleOutfitScreen(
     onBack: () -> Unit = {},
     onEliminar: () -> Unit = {},
     navController: NavController
+
 ) {
+
+    val todasLasPrendas by viewModel.prendas.collectAsState(initial = emptyList())
+
+    val idsPrendasOutfit = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
+    val prendasDelOutfit = todasLasPrendas.filter { it.id in idsPrendasOutfit }
+    val etiquetasLista = outfit.etiquetas.split(",").filter { it.isNotBlank() }
+
     // Estado local de likes / favorito
     var liked by remember { mutableStateOf(false) }
     var favorito by remember { mutableStateOf(false) }
-    var likes by remember { mutableIntStateOf(530) }
-    var favCount by remember { mutableIntStateOf(305) }
+    var likes by remember { mutableIntStateOf(outfit.likes ?: 0) }
+    var favCount by remember { mutableIntStateOf(outfit.favoritos ?: 0) }
 
     Scaffold(
         topBar = { LookiestTopBar() },
@@ -94,7 +103,7 @@ fun DetalleOutfitScreen(
                                 )
                             }
                             Text(
-                                text = "Detalles del Outfit",
+                                text = outfit.nombre.ifBlank { "Detalles del Outfit" },
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace
@@ -174,22 +183,23 @@ fun DetalleOutfitScreen(
             }
 
             // etiquetas
-            item {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    outfit.etiquetas.forEach { tag ->
-                        EtiquetaChip(tag)
+            if (etiquetasLista.isNotEmpty()) {
+                item {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        etiquetasLista.forEach { tag ->
+                            EtiquetaChip(tag.trim())
+                        }
                     }
                 }
             }
 
-            // prendas
-            items(outfit.prendas, key = { it.id }) { prenda ->
+            // Prendas filtradas
+            items(prendasDelOutfit, key = { it.id }) { prenda ->
                 PrendaDetalleRow(prenda)
             }
-
             item { Spacer(Modifier.height(8.dp)) }
         }
     }
@@ -214,18 +224,19 @@ fun PrendaDetalleRow(prenda: PrendaRopa) {
                 modifier = Modifier
                     .size(80.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Blanco),
+                    .background(BlancoFondo),
                 contentAlignment = Alignment.Center
             ) {
-                if (prenda.imagen != null) {
-                    Image(
-                        painter = painterResource(id = prenda.imagen),
+
+                if (!prenda.imagen.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = prenda.imagen,
                         contentDescription = prenda.nombre,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.Crop
                     )
                 } else {
-                    androidx.compose.material3.Icon(
+                    Icon(
                         imageVector = Icons.Default.Checkroom,
                         contentDescription = null,
                         tint = Color.LightGray,

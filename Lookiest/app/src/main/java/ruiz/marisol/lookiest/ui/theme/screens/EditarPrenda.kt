@@ -80,7 +80,7 @@ import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 @Composable
 fun EditarPrendaScreen(
     prendaInicial: PrendaRopa,
-    viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: ClosetViewModel,
     onGuardado: () -> Unit = {},
     onDescartado: () -> Unit = {},
     navController: NavController

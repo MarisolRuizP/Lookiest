@@ -38,7 +38,7 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavigation(
-    viewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
     closetViewModel: ClosetViewModel
 ) {
     val navController = rememberNavController()

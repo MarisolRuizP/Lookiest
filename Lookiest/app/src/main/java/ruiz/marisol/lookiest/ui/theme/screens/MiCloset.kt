@@ -42,11 +42,12 @@ fun ClosetScreen(
     navController: NavController,
     onPrendaClick: (PrendaRopa) -> Unit = {},
 ) {
+    val prendas by viewModel.prendas.collectAsState(initial = emptyList())
     var busqueda by remember { mutableStateOf("") }
 
-    val listaFiltrada = remember(busqueda, viewModel.prendas) {
-        if (busqueda.isBlank()) viewModel.prendas
-        else viewModel.prendas.filter {
+    val listaFiltrada = remember(busqueda, prendas) {
+        if (busqueda.isBlank()) prendas
+        else prendas.filter {
             it.nombre.contains(busqueda, ignoreCase = true) ||
                     it.categoria.contains(busqueda, ignoreCase = true) ||
                     it.tienda.contains(busqueda, ignoreCase = true)
@@ -82,7 +83,7 @@ fun ClosetScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // ── Buscador
+            // Buscador
             OutlinedTextField(
                 value = busqueda,
                 onValueChange = { busqueda = it },
@@ -111,7 +112,7 @@ fun ClosetScreen(
 
             Spacer(Modifier.height(4.dp))
 
-            // ── Título + Ordenar
+            //Título + Ordenar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -166,10 +167,10 @@ fun ClosetScreen(
                     contentPadding = PaddingValues(bottom = 16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(listaFiltrada) { item ->
+                    items(listaFiltrada, key = { it.id }) { item ->
                         PrendaCard(
                             prenda = item,
-                            onFavoriteClick = { viewModel.favorito(item.id) },
+                            onFavoriteClick = { viewModel.favorito(item) },
                             onMoreClick = { onPrendaClick(item) }
                         )
                     }
@@ -179,14 +180,3 @@ fun ClosetScreen(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewCloset() {
-    val closetViewModel: ClosetViewModel = viewModel()
-    LookiestTheme {
-        ClosetScreen(
-            viewModel = closetViewModel,
-            navController = rememberNavController()
-        )
-    }
-}
