@@ -22,7 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.PrendaRopa
+import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
 import ruiz.marisol.lookiest.ui.theme.Azul
 import ruiz.marisol.lookiest.ui.theme.Azul50
@@ -43,9 +46,10 @@ import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 @Composable
 fun DetallesPrendaScreen(
     prenda: PrendaRopa,
-    viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: ClosetViewModel,
     onEditar: () -> Unit = {},
-    onEliminarConfirmado: () -> Unit = {}
+    onEliminarConfirmado: () -> Unit = {},
+    navController: NavController
 ) {
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
@@ -55,7 +59,7 @@ fun DetallesPrendaScreen(
             onCancelar = { mostrarDialogoEliminar = false },
             onConfirmar = {
                 mostrarDialogoEliminar = false
-                viewModel.eliminarPrenda(prenda.id)
+                viewModel.eliminarPrenda(prenda)
                 onEliminarConfirmado()
             }
         )
@@ -63,7 +67,8 @@ fun DetallesPrendaScreen(
 
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 2) },
+        bottomBar = { LookiestBottomBar(
+            selected = 2, navController) },
         containerColor = BlancoFondo
     ) { padding ->
         Column(
@@ -94,11 +99,14 @@ fun DetallesPrendaScreen(
 
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    if (prenda.imagen != null) {
-                        Image(
-                            painter = painterResource(id = prenda.imagen),
+                    // Usamos AsyncImage para leer el String (URI) de la base de datos
+                    if (!prenda.imagen.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = prenda.imagen,
                             contentDescription = prenda.nombre,
-                            modifier = Modifier.fillMaxSize() .padding(30.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(30.dp),
                             contentScale = ContentScale.Fit
                         )
                     } else {
@@ -108,7 +116,6 @@ fun DetallesPrendaScreen(
                                 .background(Color(0xFFF5F5F7))
                                 .padding(10.dp),
                             contentAlignment = Alignment.Center
-
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Checkroom,
@@ -120,7 +127,8 @@ fun DetallesPrendaScreen(
                     }
 
                     IconButton(
-                        onClick = { viewModel.favorito(prenda.id) },
+                        // Pasamos el objeto completo para cambiar el favorito en Room
+                        onClick = { viewModel.favorito(prenda) },
                         modifier = Modifier.align(Alignment.TopEnd)
                     ) {
                         Icon(
@@ -132,7 +140,6 @@ fun DetallesPrendaScreen(
                     }
                 }
             }
-
             Spacer(Modifier.height(12.dp))
 
 
@@ -247,7 +254,7 @@ fun DetallesPrendaScreen(
 @Composable
 fun parseColor(colorName: String): Color {
     return when (colorName.lowercase()) {
-        "rojo" -> Color(0xFF802626) // El color vino de tu captura
+        "rojo" -> Color(0xFF802626)
         "azul" -> Color(0xFF0C6291)
         "negro" -> Color(0xFF000004)
         "amarillo" -> Color(0xFFD8973C)
@@ -257,28 +264,3 @@ fun parseColor(colorName: String): Color {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewDetalles() {
-    val prendaDePrueba = PrendaRopa(
-        id = 1,
-        nombre = "Chaqueta roja de vinipiel",
-        tienda = "Zara",
-        talla = "Mediana",
-        color = "Rojo",
-        estampado = false,
-        categoria = "OuterWear",
-        tags = listOf("Leather"),
-        temporada = listOf("Otoño", "Invierno"),
-        formalidad = "Casual",
-        imagen = null
-    )
-
-    LookiestTheme() {
-        DetallesPrendaScreen(
-            prenda = prendaDePrueba,
-            onEditar = {}
-
-        )
-    }
-}

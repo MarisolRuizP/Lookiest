@@ -1,4 +1,6 @@
 [versions]
+room = "2.6.1"
+ksp = "2.2.10-2.0.2"
 agp = "9.0.0"
 coreKtx = "1.18.0"
 junit = "4.13.2"
@@ -17,6 +19,11 @@ lifecycleLivedataKtx = "2.10.0"
 runtimeLivedata = "1.11.0"
 
 [libraries]
+
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
