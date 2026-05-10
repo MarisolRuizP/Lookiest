@@ -11,8 +11,17 @@ import ruiz.marisol.lookiest.data.PrendaRopa
 
     @Dao
     interface PrendaDao {
-        @Query("SELECT * FROM prendas")
+        @Query("SELECT * FROM prendas ORDER BY nombre ASC")
         fun obtenerTodasLasPrendas(): Flow<List<PrendaRopa>>
+
+        @Query("SELECT * FROM prendas WHERE favorito = 1")
+        fun obtenerFavoritas(): Flow<List<PrendaRopa>>
+
+        @Query("SELECT * FROM prendas WHERE usadaHoy = 1")
+        fun obtenerUsadasHoy(): Flow<List<PrendaRopa>>
+
+        @Query("SELECT * FROM prendas WHERE id = :id")
+        suspend fun obtenerPrendaPorId(id: Int): PrendaRopa?
 
         @Insert(onConflict = OnConflictStrategy.REPLACE)
         suspend fun insertarPrenda(prenda: PrendaRopa)
@@ -22,4 +31,13 @@ import ruiz.marisol.lookiest.data.PrendaRopa
 
         @Delete
         suspend fun eliminarPrenda(prenda: PrendaRopa)
+
+        @Query("UPDATE prendas SET favorito = CASE WHEN favorito = 1 THEN 0 ELSE 1 END WHERE id = :id")
+        suspend fun toggleFavorito(id: Int)
+
+        @Query("UPDATE prendas SET usadaHoy = :usada WHERE id = :id")
+        suspend fun setUsadaHoy(id: Int, usada: Boolean)
+
+        @Query("UPDATE prendas SET usadaHoy = 0")
+        suspend fun resetUsadasHoy()
     }

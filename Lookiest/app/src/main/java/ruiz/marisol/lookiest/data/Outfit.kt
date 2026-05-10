@@ -13,5 +13,7 @@ data class Outfit(
     val etiquetas: String,
     val creadoPor: String = "Mi",
     val likes : Int? = 0,
-    val favoritos : Int? = 0
+    val favoritos : Int? = 0,
+    val totalUsos: Int = 0,
+    val esOutfitDeHoy: Boolean = false
 )

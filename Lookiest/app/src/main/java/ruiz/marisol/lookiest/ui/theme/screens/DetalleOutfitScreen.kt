@@ -50,6 +50,7 @@ fun DetalleOutfitScreen(
     outfit: Outfit,
     viewModel: ClosetViewModel,
     onBack: () -> Unit = {},
+    onEditar: () -> Unit = {},
     onEliminar: () -> Unit = {},
     navController: NavController
 
@@ -66,6 +67,32 @@ fun DetalleOutfitScreen(
     var favorito by remember { mutableStateOf(false) }
     var likes by remember { mutableIntStateOf(outfit.likes ?: 0) }
     var favCount by remember { mutableIntStateOf(outfit.favoritos ?: 0) }
+
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+    if (mostrarDialogoEliminar) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoEliminar = false },
+            title = { Text("¿Eliminar outfit?", fontWeight = FontWeight.Bold) },
+            text  = { Text("Esta acción no se puede deshacer.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarDialogoEliminar = false
+                        onEliminar()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Rosa)
+                ) { Text("Eliminar") }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { mostrarDialogoEliminar = false },
+                    colors  = ButtonDefaults.buttonColors(containerColor = Amarillo)
+                ) { Text("Cancelar") }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 
     Scaffold(
         topBar = { LookiestTopBar() },
@@ -92,7 +119,7 @@ fun DetalleOutfitScreen(
 
                         Row(verticalAlignment = Alignment.CenterVertically){
                             IconButton(
-                                onClick  = { /* onBack() cuando agregues navegación */ },
+                                onClick  = onBack,
                                 modifier = Modifier.size(32.dp)
                             ) {
                                 Icon(
@@ -201,6 +228,29 @@ fun DetalleOutfitScreen(
                 PrendaDetalleRow(prenda)
             }
             item { Spacer(Modifier.height(8.dp)) }
+
+            item {
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier              = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick  = { mostrarDialogoEliminar = true },
+                        colors   = ButtonDefaults.buttonColors(containerColor = Rosa),
+                        shape    = RoundedCornerShape(50),
+                        modifier = Modifier.weight(1f).height(48.dp)
+                    ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+
+                    Button(
+                        onClick  = onEditar,
+                        colors   = ButtonDefaults.buttonColors(containerColor = Amarillo),
+                        shape    = RoundedCornerShape(50),
+                        modifier = Modifier.weight(1f).height(48.dp)
+                    ) { Text("Editar", fontWeight = FontWeight.Bold) }
+                }
+                Spacer(Modifier.height(20.dp))
+            }
         }
     }
 }

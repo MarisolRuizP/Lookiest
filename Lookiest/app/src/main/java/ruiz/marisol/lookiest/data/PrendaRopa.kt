@@ -17,5 +17,6 @@ data class PrendaRopa (
     val temporada: List<String> = emptyList(),
     val formalidad: String,
     val imagen: String? = null,
-    val favorito: Boolean = false
+    val favorito: Boolean = false,
+    val usadaHoy: Boolean = false
 )

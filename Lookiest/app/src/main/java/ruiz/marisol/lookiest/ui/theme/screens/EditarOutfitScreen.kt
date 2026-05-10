@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
@@ -28,7 +29,8 @@ fun EditarOutfitScreen(
     outfitInicial: Outfit,
     viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onGuardado:   () -> Unit = {},
-    onDescartado: () -> Unit = {}
+    onDescartado: () -> Unit = {},
+    navController: NavController,
 ) {
     // Estado pre-cargado con los datos del outfit existente
     var nombre               by remember { mutableStateOf(outfitInicial.nombre) }
