@@ -10,15 +10,19 @@ import ruiz.marisol.lookiest.data.UsoOutfit
 
 @Dao
 interface UsoOutfitDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertar(uso: UsoOutfit)
 
-    @Query("SELECT * FROM usosOutfit")
+    @Query("SELECT * FROM usosOutfit ORDER BY fecha DESC")
     fun obtenerTodos(): Flow<List<UsoOutfit>>
 
     @Query("SELECT * FROM usosOutfit WHERE fecha = :fecha")
-    fun obtenerPorFecha(fecha: String): Flow<List<UsoOutfit>>
+    suspend fun obtenerPorFecha(fecha: String): List<UsoOutfit>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertar(uso: UsoOutfit)
 
     @Delete
     suspend fun eliminar(uso: UsoOutfit)
+
+    @Query("DELETE FROM usosOutfit WHERE fecha = :fecha")
+    suspend fun eliminarPorFecha(fecha: String)
 }

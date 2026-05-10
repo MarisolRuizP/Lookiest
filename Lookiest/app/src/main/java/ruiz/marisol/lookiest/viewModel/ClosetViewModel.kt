@@ -72,27 +72,14 @@ class ClosetViewModel(
         .obtenerTodos()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun registrarUso(outfitId: Int, fecha: String) = viewModelScope.launch {
-        usoDAO.insertar(UsoOutfit(oufitId = outfitId, fecha = fecha))
-    }
+
+
 
     fun eliminarUso(uso: UsoOutfit) = viewModelScope.launch {
         usoDAO.eliminar(uso)
     }
 
-    fun prendasUsadasEn(fecha: String): List<PrendaRopa> {
-        val outfitIds = usos.value
-            .filter { it.fecha == fecha }
-            .map { it.oufitId }
 
-        val prendaIds = outfits.value
-            .filter { it.id in outfitIds }
-            .flatMap { outfit ->
-                outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
-            }
-            .distinct()
-        return prendas.value.filter { it.id in prendaIds }
-    }
 
 
     fun agregarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
@@ -121,22 +108,7 @@ class ClosetViewModel(
         prendaDAO.resetUsadasHoy()
     }
 
-    /**
-     * Guarda el uso diario actual en el calendario.
-     * Llama esto cuando el usuario confirma "Guardar Outfit" en OutfitDeHoyScreen.
-     */
-    fun guardarUsoDiario() {
-        val hoy = java.time.LocalDate.now().toString()
-        // Registramos un uso por outfit de hoy si existe
-        val hoyOutfit = outfitDeHoy.value
-        if (hoyOutfit != null) {
-            registrarUso(hoyOutfit.id, hoy)
-        }
-    }
 
-    // ── Outfits ────────────────────────────────────────────────────────────
-
-    /** Inserta un Outfit directamente (usado en CrearOutfitScreen) */
     fun agregarOutfit(outfit: Outfit) = viewModelScope.launch {
         outfitDAO.insertarOutfit(outfit)
     }
@@ -148,15 +120,41 @@ class ClosetViewModel(
     fun actualizarOutfit(outfitActualizado: Outfit) = viewModelScope.launch {
         outfitDAO.actualizarOutfit(outfitActualizado)
     }
-
-    /**
-     * Marca un outfit como "el outfit de hoy" e incrementa sus usos.
-     * También registra el uso en el calendario.
-     */
     fun setOutfitDeHoy(outfitId: Int) = viewModelScope.launch {
         outfitDAO.resetOutfitDeHoy()
         outfitDAO.setOutfitDeHoy(outfitId)
         outfitDAO.incrementarUsos(outfitId)
-        registrarUso(outfitId, java.time.LocalDate.now().toString())
+        usoDAO.insertar(
+            UsoOutfit(
+                oufitId = outfitId,
+                fecha   = java.time.LocalDate.now().toString()
+            )
+        )
     }
+
+    fun guardarUsoDiario() = viewModelScope.launch {
+        val hoy  = java.time.LocalDate.now().toString()
+        val ids  = prendasUsadasHoy.value.map { it.id }
+        if (ids.isEmpty()) return@launch
+
+        usoDAO.eliminarPorFecha(hoy)
+
+        ids.forEach { prendaId ->
+            usoDAO.insertar(
+                UsoOutfit(
+                    oufitId = prendaId,
+                    fecha   = hoy
+                )
+            )
+        }
+    }
+
+    fun prendasUsadasEn(fecha: String): List<PrendaRopa> {
+        val prendaIds = usos.value
+            .filter { it.fecha == fecha }
+            .map { it.oufitId }
+        return prendas.value.filter { it.id in prendaIds }
+    }
+
+
 }
