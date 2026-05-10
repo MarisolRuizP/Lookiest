@@ -52,7 +52,7 @@ fun OutfitsScreen(
     var busqueda by remember { mutableStateOf("") }
 
     val misOutfits = outfits.filter { it.creadoPor == "Mi" }
-    val explorar = outfits.filter { it.esPublico && it.creadoPor != "Mi" }
+    val explorar = outfits.filter { it.esPublico } //&& it.creadoPor != "Mi"
 
     val listaActual = if (tabSeleccionado == 0) misOutfits else explorar
 

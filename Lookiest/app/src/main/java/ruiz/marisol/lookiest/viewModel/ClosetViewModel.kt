@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ruiz.marisol.lookiest.data.DAO.OutfitDao
 import ruiz.marisol.lookiest.data.DAO.PrendaDao
+import ruiz.marisol.lookiest.data.DAO.UsoOutfitDao
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.data.UsoOutfit
 class ClosetViewModel(
     private val prendaDAO: PrendaDao,
-    private val outfitDAO: OutfitDao
+    private val outfitDAO: OutfitDao,
+    private val usoDAO: UsoOutfitDao
 ) : ViewModel() {
 
     private val _tallas      = listOf("XS", "S", "M", "L", "XL", "XXL")
@@ -66,23 +68,20 @@ class ClosetViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
 
-    var usos by mutableStateOf(listOf<UsoOutfit>())
-        private set
+    val usos: StateFlow<List<UsoOutfit>> = usoDAO
+        .obtenerTodos()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun registrarUso(outfitId: Int, fecha: String) {
-        usos = usos + UsoOutfit(
-            id      = usos.size + 1,
-            oufitId = outfitId,
-            fecha   = fecha
-        )
+    fun registrarUso(outfitId: Int, fecha: String) = viewModelScope.launch {
+        usoDAO.insertar(UsoOutfit(oufitId = outfitId, fecha = fecha))
     }
 
-    fun eliminarUso(id: Int) {
-        usos = usos.filter { it.id != id }
+    fun eliminarUso(uso: UsoOutfit) = viewModelScope.launch {
+        usoDAO.eliminar(uso)
     }
 
     fun prendasUsadasEn(fecha: String): List<PrendaRopa> {
-        val outfitIds = usos
+        val outfitIds = usos.value
             .filter { it.fecha == fecha }
             .map { it.oufitId }
 
@@ -92,7 +91,6 @@ class ClosetViewModel(
                 outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
             }
             .distinct()
-
         return prendas.value.filter { it.id in prendaIds }
     }
 

@@ -89,6 +89,20 @@ fun Context.createImageFile(): File {
     )
 }
 
+fun Context.copiarImagenAInternos(uri: Uri): String? {
+    return try {
+        val inputStream = contentResolver.openInputStream(uri) ?: return null
+        val dir = File(filesDir, "prendas").apply { mkdirs() }
+        val file = File(dir, "prenda_${System.currentTimeMillis()}.jpg")
+        file.outputStream().use { output ->
+            inputStream.copyTo(output)
+        }
+        file.absolutePath
+    } catch (e: Exception) {
+        null
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AgregarPrendaScreen(
@@ -185,7 +199,7 @@ fun AgregarPrendaScreen(
             mensaje = "¿Deseas guardar la nueva prenda?",
             onCancelar = { mostrarDialogoGuardar = false },
             onConfirmar = {
-
+                val rutaImagen = imageUri?.let { context.copiarImagenAInternos(it) }
                 mostrarDialogoGuardar = false
                 // armar dto
                 val nuevaPrenda = PrendaRopa(
@@ -199,7 +213,7 @@ fun AgregarPrendaScreen(
                     tags = tagsSeleccionadas.toList(),
                     temporada = temporadasSeleccionadas.toList(),
                     formalidad = formalidad,
-                    imagen = imageUri?.toString(), // va la url d la imagen
+                    imagen = rutaImagen,
                     favorito = false
                 )
 

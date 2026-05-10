@@ -37,6 +37,14 @@ import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
 import ruiz.marisol.lookiest.ui.theme.components.PrendaCard
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 
+enum class OrdenPrenda(val label: String) {
+    NOMBRE("Nombre A–Z"),
+    NOMBRE_DESC("Nombre Z–A"),
+    CATEGORIA("Categoría"),
+    FAVORITOS("Favoritos primero"),
+    COLOR("Color")
+}
+
 @Composable
 fun ClosetScreen(
     viewModel: ClosetViewModel,
@@ -45,13 +53,25 @@ fun ClosetScreen(
 ) {
     val prendas by viewModel.prendas.collectAsState(initial = emptyList())
     var busqueda by remember { mutableStateOf("") }
+    var ordenActual by remember { mutableStateOf(OrdenPrenda.NOMBRE) }
+    var mostrarMenuOrden by remember { mutableStateOf(false) }
 
-    val listaFiltrada = remember(busqueda, prendas) {
-        if (busqueda.isBlank()) prendas
+    val listaFinal = remember(busqueda, prendas, ordenActual) {
+        val filtrada = if (busqueda.isBlank()) prendas
         else prendas.filter {
             it.nombre.contains(busqueda, ignoreCase = true) ||
                     it.categoria.contains(busqueda, ignoreCase = true) ||
-                    it.tienda.contains(busqueda, ignoreCase = true)
+                    it.tienda.contains(busqueda, ignoreCase = true) ||
+                    it.color.contains(busqueda, ignoreCase = true) ||
+                    it.tags.any { tag -> tag.contains(busqueda, ignoreCase = true) }
+        }
+
+        when (ordenActual) {
+            OrdenPrenda.NOMBRE       -> filtrada.sortedBy { it.nombre.lowercase() }
+            OrdenPrenda.NOMBRE_DESC  -> filtrada.sortedByDescending { it.nombre.lowercase() }
+            OrdenPrenda.CATEGORIA    -> filtrada.sortedBy { it.categoria.lowercase() }
+            OrdenPrenda.FAVORITOS    -> filtrada.sortedByDescending { it.favorito }
+            OrdenPrenda.COLOR        -> filtrada.sortedBy { it.color.lowercase() }
         }
     }
 
@@ -84,7 +104,6 @@ fun ClosetScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // Buscador
             OutlinedTextField(
                 value = busqueda,
                 onValueChange = { busqueda = it },
@@ -113,7 +132,6 @@ fun ClosetScreen(
 
             Spacer(Modifier.height(4.dp))
 
-            //Título + Ordenar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -125,29 +143,49 @@ fun ClosetScreen(
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace
                 )
-                Spacer(Modifier.width(90.dp))
-                TextButton(onClick = { }) {
-                    Text(
-                        text = "Ordenar por",
-                        color = Rosa,
-                        fontSize = 13.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    IconButton({}) {
-                        Icon(
-                            imageVector        = Icons.Default.SwapVert,
-                            contentDescription = "Ordenar",
-                            tint               = Rosa
+                Box {
+                    TextButton(onClick = { mostrarMenuOrden = true }) {
+                        Text(
+                            text = "Ordenar por",
+                            color = Rosa,
+                            fontSize = 13.sp,
+                            fontFamily = FontFamily.Monospace
                         )
+                        IconButton({}) {
+                            Icon(
+                                imageVector = Icons.Default.SwapVert,
+                                contentDescription = "Ordenar",
+                                tint = Rosa
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = mostrarMenuOrden,
+                            onDismissRequest = {mostrarMenuOrden = false}
+                        ) {
+                            OrdenPrenda.entries.forEach { opcion ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = opcion.label,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = if (opcion == ordenActual) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (opcion == ordenActual) Rosa else Color.DarkGray
+                                        )
+                                    },
+                                    onClick = {
+                                        ordenActual = opcion
+                                        mostrarMenuOrden = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
-
             }
 
             Spacer(Modifier.height(8.dp))
 
-            // ── Grid de prendas
-            if (listaFiltrada.isEmpty()) {
+            if (listaFinal.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -157,7 +195,7 @@ fun ClosetScreen(
                         else "Tu clóset está vacío.\n¡Agrega tu primera prenda!",
                         color = Color.Gray,
                         fontSize = 14.sp,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        textAlign = TextAlign.Center
                     )
                 }
             } else {
@@ -168,7 +206,7 @@ fun ClosetScreen(
                     contentPadding = PaddingValues(bottom = 16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(listaFiltrada, key = { it.id }) { item ->
+                    items(listaFinal, key = { it.id }) { item ->
                         PrendaCard(
                             prenda = item,
                             onFavoriteClick = { viewModel.favorito(item) },

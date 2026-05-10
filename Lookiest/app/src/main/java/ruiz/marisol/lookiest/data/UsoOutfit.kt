@@ -1,7 +1,12 @@
 package ruiz.marisol.lookiest.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "usosOutfit")
 data class UsoOutfit(
-    val id: Int,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val oufitId: Int,
-    val fecha: String
+    val fecha: String //formato YYYY/MM/DD
 )

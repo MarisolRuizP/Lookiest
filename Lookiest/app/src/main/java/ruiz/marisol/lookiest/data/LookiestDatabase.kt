@@ -7,10 +7,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ruiz.marisol.lookiest.data.DAO.OutfitDao
 import ruiz.marisol.lookiest.data.DAO.PrendaDao
+import ruiz.marisol.lookiest.data.DAO.UsoOutfitDao
 
 @Database(
-    entities = [PrendaRopa::class, Outfit::class],
-    version = 1,
+    entities = [PrendaRopa::class, Outfit::class, UsoOutfit::class],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -18,6 +19,7 @@ abstract class LookiestDatabase : RoomDatabase() {
 
     abstract fun prendaDao(): PrendaDao
     abstract fun outfitDao(): OutfitDao
+    abstract fun usoOutfitDao(): UsoOutfitDao
 
     companion object {
         @Volatile
@@ -29,7 +31,9 @@ abstract class LookiestDatabase : RoomDatabase() {
                     context.applicationContext,
                     LookiestDatabase::class.java,
                     "lookiest_database"
-                ).build().also { INSTANCE = it }
+                )
+                    .fallbackToDestructiveMigration()
+                    .build().also { INSTANCE = it }
             }
         }
     }

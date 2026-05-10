@@ -33,7 +33,11 @@ class MainActivity : ComponentActivity() {
             this,
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return ClosetViewModel(database.prendaDao(), database.outfitDao()) as T
+                    return ClosetViewModel(
+                        database.prendaDao(),
+                        database.outfitDao(),
+                        database.usoOutfitDao()  
+                    ) as T
                 }
             }
         )[ClosetViewModel::class.java]

@@ -247,7 +247,10 @@ fun AppNavigation(
         }
 
         composable(Screen.Calendario.route) {
-            CalendarioScreen(viewModel = closetViewModel)
+            CalendarioScreen(
+                viewModel = closetViewModel,
+                navController = navController
+                )
         }
     }
 }
