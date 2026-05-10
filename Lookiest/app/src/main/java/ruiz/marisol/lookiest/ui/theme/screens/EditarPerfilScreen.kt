@@ -198,16 +198,16 @@ fun EditarPerfilScreen(
                         mostrarDialogo = false
                         onNavigateBack()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mustard_yellow))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                 ) { Text("Confirmar") }
             },
             dismissButton = {
                 Button(
                     onClick = { mostrarDialogo = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA63968))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) { Text("Cancelar") }
             },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(15.dp)
         )
     }
