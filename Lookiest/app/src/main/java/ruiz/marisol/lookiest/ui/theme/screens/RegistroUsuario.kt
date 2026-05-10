@@ -25,9 +25,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -79,207 +82,270 @@ fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit)
     var mostrarCalendario by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Image(
-            painter = painterResource(id = R.drawable.lookiest_logo),
-            "Logo de la aplicación",
-            modifier = Modifier.size(100.dp)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-
-
-        Text(text = "Lookiest", fontSize = 38.sp, fontWeight = FontWeight.Bold)
-
-        val text = buildAnnotatedString {
-            withStyle(style = SpanStyle(
-                color = Color(0xFF005681),
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.lookiest_logo),
+                contentDescription = null,
+                modifier = Modifier.size(100.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
-            ) {
-                append("Dress")
-            }
+            Spacer(modifier = Modifier.height(10.dp))
 
-            withStyle(style = SpanStyle(
-                color = Color.Black,
-                fontSize = 20.sp
-            )) {
-                append(" Your ")
-            }
 
-            withStyle(style = SpanStyle(
-                color = Color(0xFFA63968),
+            Text(
+                text = "Lookiest",
+                fontSize = 38.sp,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )) {
-                append("Best")
-            }
-        }
-        Text(
-            text = text,
-            fontFamily = FontFamily.Monospace
-        )
+                color = MaterialTheme.colorScheme.onSurface
+            )
 
-        Spacer(modifier = Modifier.height(15.dp))
-
-        CampoRegistro(label = "Nombre de usuario", value = user, onValueChange = { user = it })
-
-        CampoRegistro(label = "Nombre(s)", value = nombres, onValueChange = { nombres = it })
-
-        CampoRegistro(label = "Apellido(s)", value = apellidos, onValueChange = { apellidos = it })
-
-        CampoRegistro(label = "Correo Electrónico", value = correo, onValueChange = { correo = it })
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-
-            Box(modifier = Modifier.weight(1f)) {
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(text = "Fecha de Nacimiento", fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    OutlinedTextField(
-                        value = fechaNacimiento,
-                        onValueChange = { },
-                        readOnly = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { mostrarCalendario = true },
-                        enabled = false,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledTextColor = Color.Black,
-                            disabledContainerColor = Color.White,
-                            disabledBorderColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+            val text = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
-                }
-            }
-            if (mostrarCalendario) {
-                DatePickerDialog(
-                    onDismissRequest = { mostrarCalendario = false },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            val fechaSelection = datePickerState.selectedDateMillis
-                            if (fechaSelection != null) {
-                                fechaNacimiento = SimpleDateFormat(
-                                    "dd/MM/yyyy",
-                                    Locale.getDefault()
-                                ).format(Date(fechaSelection))
-                            }
-                            mostrarCalendario = false
-                        }) { Text("OK") }
-                    }
                 ) {
-                    DatePicker(state = datePickerState)
+                    append("Dress")
+                }
+
+                withStyle(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 20.sp
+                    )
+                ) {
+                    append(" Your ")
+                }
+
+                withStyle(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                ) {
+                    append("Best")
                 }
             }
+            Text(
+                text = text,
+                fontFamily = FontFamily.Monospace
+            )
 
+            Spacer(modifier = Modifier.height(15.dp))
 
-            Box(modifier = Modifier.weight(1f)) {
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(text = "Género", fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(4.dp))
+            CampoRegistro(label = "Nombre de usuario", value = user, onValueChange = { user = it })
 
-                    ExposedDropdownMenuBox(
-                        expanded = expandido,
-                        onExpandedChange = { expandido = !expandido }
-                    ) {
-                        TextField(
-                            value = genero,
-                            onValueChange = {},
+            CampoRegistro(label = "Nombre(s)", value = nombres, onValueChange = { nombres = it })
+
+            CampoRegistro(
+                label = "Apellido(s)",
+                value = apellidos,
+                onValueChange = { apellidos = it })
+
+            CampoRegistro(
+                label = "Correo Electrónico",
+                value = correo,
+                onValueChange = { correo = it })
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+
+                Box(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(
+                            text = "Fecha de Nacimiento",
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = fechaNacimiento,
+                            onValueChange = { },
                             readOnly = true,
                             modifier = Modifier
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                                .fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido)
-                            },
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
+                                .fillMaxWidth()
+                                .clickable { mostrarCalendario = true },
+                            enabled = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black
+                            ),
+                            shape = RoundedCornerShape(16.dp)
                         )
+                    }
 
-                        ExposedDropdownMenu(
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(top = 25.dp)
+                            .clickable { mostrarCalendario = true }
+                    )
+                }
+                if (mostrarCalendario) {
+                    DatePickerDialog(
+                        onDismissRequest = { mostrarCalendario = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                val fechaSelection = datePickerState.selectedDateMillis
+                                if (fechaSelection != null) {
+                                    fechaNacimiento = SimpleDateFormat(
+                                        "dd/MM/yyyy",
+                                        Locale.getDefault()
+                                    ).format(Date(fechaSelection))
+                                }
+                                mostrarCalendario = false
+                            }) { Text("OK") }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+
+
+                Box(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(
+                            text = "Género",
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        ExposedDropdownMenuBox(
                             expanded = expandido,
-                            onDismissRequest = { expandido = false },
-                            modifier = Modifier.background(Color.White)
+                            onExpandedChange = { expandido = !expandido }
                         ) {
-                            opcionesGenero.forEach { opcion ->
-                                DropdownMenuItem(
-                                    text = { Text(opcion) },
-                                    onClick = {
-                                        genero = opcion
-                                        expandido = false
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            TextField(
+                                value = genero,
+                                onValueChange = {},
+                                readOnly = true,
+                                modifier = Modifier
+                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido)
+                                },
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
                                 )
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = expandido,
+                                onDismissRequest = { expandido = false },
+                                modifier = Modifier.background(Color.White)
+                            ) {
+                                opcionesGenero.forEach { opcion ->
+                                    DropdownMenuItem(
+                                        text = { Text(opcion) },
+                                        onClick = {
+                                            genero = opcion
+                                            expandido = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        CampoRegistro(label = "Contraseña", value = pass, onValueChange = {pass = it}, isPassword = true)
-
-        CampoRegistro(label = "Confirmar Contraseña", value = confirmarPass, onValueChange = {confirmarPass = it}, isPassword = true)
-
-        Spacer(modifier = Modifier.height(10.dp))
-        Button(
-            onClick = {
-                val contexto = context
-
-                if (user.isBlank() || correo.isBlank() || pass.isBlank()) {
-                    Toast.makeText(context, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
-                }
-                else if (pass != confirmarPass) {
-                    Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-                }
-                else {
-                    val nuevoUsuario = Usuario(
-                        email = correo,
-                        username = user,
-                        nombre = "$nombres $apellidos",
-                        contrasena = pass,
-                        genero = genero,
-                        fechaNacimiento = fechaNacimiento,
-                        biometriaActiva = false,
-                        fotoPerfil = null
-                    )
-
-                    viewModel.registrarEnRoom(nuevoUsuario)
-
-                    Toast.makeText(context, "¡Usuario registrado con éxito!", Toast.LENGTH_SHORT).show()
-                    onRegistrationComplete()
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(49.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(id = R.color.mustard_yellow)
+            CampoRegistro(
+                label = "Contraseña",
+                value = pass,
+                onValueChange = { pass = it },
+                isPassword = true
             )
-        ) {
-            Text(fontSize = 17.sp, text = "Registrarme")
+
+            CampoRegistro(
+                label = "Confirmar Contraseña",
+                value = confirmarPass,
+                onValueChange = { confirmarPass = it },
+                isPassword = true
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(
+                onClick = {
+                    val camposIncompletos = user.isBlank() ||
+                            correo.isBlank() ||
+                            pass.isBlank() ||
+                            nombres.isBlank() ||
+                            apellidos.isBlank() ||
+                            fechaNacimiento.isBlank() ||
+                            genero.isBlank()
+
+                    if (camposIncompletos) {
+                        Toast.makeText(
+                            context,
+                            "Por favor, llena todos los campos",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (pass != confirmarPass) {
+                        Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        val nuevoUsuario = Usuario(
+                            email = correo,
+                            username = user,
+                            nombre = "$nombres $apellidos",
+                            contrasena = pass,
+                            genero = genero,
+                            fechaNacimiento = fechaNacimiento,
+                            biometriaActiva = false,
+                            fotoPerfil = null,
+                            isDarkMode = false
+                        )
+
+                        viewModel.registrarEnRoom(nuevoUsuario)
+
+                        Toast.makeText(
+                            context,
+                            "¡Usuario registrado con éxito!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        onRegistrationComplete()
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(49.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
+            ) {
+                Text(fontSize = 17.sp, text = "Registrarme")
+            }
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun RegistroScreenPreview(){
-//    RegistroScreen()
-//}
 

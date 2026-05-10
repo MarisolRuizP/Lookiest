@@ -6,6 +6,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -55,7 +58,9 @@ import ruiz.marisol.lookiest.viewModel.AuthViewModel
 @Composable
 fun CambiarContraScreen(
     viewModel: AuthViewModel,
-    onNavigateBack: () -> Unit
+    esOlvido: Boolean,
+    onNavigateBack: () -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     // Obtenemos la contraseña actual guardada para validar
     val passGuardada by viewModel.password.collectAsState()
@@ -84,7 +89,7 @@ fun CambiarContraScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
 
         Column(
@@ -95,13 +100,16 @@ fun CambiarContraScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                val esOscuro = isSystemInDarkTheme()
+
                 Image(
                     painter = painterResource(id = R.drawable.lookiest_logo),
                     contentDescription = null,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(40.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold,color = MaterialTheme.colorScheme.onBackground)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -126,13 +134,12 @@ fun CambiarContraScreen(
                         .background(Color.White, CircleShape)
                         .size(30.dp)
                 ) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onTertiaryContainer)
                 }
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-
-
+            if (!esOlvido) {
                 CampoContra(
                     label = "Contraseña Anterior",
                     value = passAnterior,
@@ -141,27 +148,15 @@ fun CambiarContraScreen(
                     onToggleVisibility = {
                         if (usuarioData?.biometriaActiva == true) {
                             biometricHelper.lanzarBiometria(
-                                onSuccess = {
-                                    visible1 = !visible1
-                                },
-                                onError = { error ->
-                                    Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
-                                }
+                                onSuccess = { visible1 = !visible1 },
+                                onError = { Toast.makeText(context, "Error: $it", Toast.LENGTH_SHORT).show() }
                             )
                         } else {
-                            Toast.makeText(
-                                context,
-                                "Debes activar la biometría en tu perfil para ver este campo",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    },
-                    onIconClick = {
-                        if (usuarioData?.biometriaActiva == true) {
-                            Toast.makeText(context, "Sensor de huella activado...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Activa la biometría para ver este campo", Toast.LENGTH_LONG).show()
                         }
                     }
                 )
+            }
 
                 CampoContra(
                     label = "Contraseña Nueva",
@@ -170,8 +165,6 @@ fun CambiarContraScreen(
                     isVisible = visible2,
                     onToggleVisibility = { visible2 = !visible2 }
                 )
-
-
 
                 CampoContra(
                     label = "Confirmar Contraseña Nueva",
@@ -196,7 +189,9 @@ fun CambiarContraScreen(
 
                 Button(
                     onClick = {
-                        if (passAnterior != passGuardada) {
+                        val anteriorCorrecta = esOlvido || passAnterior == passGuardada
+
+                        if (!anteriorCorrecta) {
                             Toast.makeText(context, "La contraseña anterior no coincide", Toast.LENGTH_SHORT).show()
                         } else if (passNueva != passConfirmar) {
                             Toast.makeText(context, "Las nuevas contraseñas no coinciden", Toast.LENGTH_SHORT).show()
@@ -205,11 +200,15 @@ fun CambiarContraScreen(
                         } else {
                             viewModel.updatePassword(passNueva)
                             Toast.makeText(context, "¡Contraseña actualizada!", Toast.LENGTH_SHORT).show()
-                            onNavigateBack()
+                            if(esOlvido){
+                                onNavigateToHome()
+                            }else{
+                                onNavigateBack()
+                            }
                         }
                     },
                     modifier = Modifier.weight(1f).height(45.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mustard_yellow)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                     shape = RoundedCornerShape(20.dp)
                 ) { Text("Guardar") }
             }

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -83,7 +84,7 @@ fun PerfilScreen(
         topBar = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(selected = 4, navController = navController) },
         modifier = Modifier.fillMaxSize(),
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -137,12 +138,12 @@ fun PerfilScreen(
             )
             Text(
                 text = "@${usuarioData?.username ?: userNameSession}",
-                color = Color(0xFF005681),
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp
             )
             Text(
                 text = usuarioData?.email ?: "",
-                color = Color(0xFFA63968),
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp
             )
 
@@ -151,10 +152,10 @@ fun PerfilScreen(
             Button(
                 onClick = onNavigateToEdit,
                 modifier = Modifier.fillMaxWidth().height(45.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mustard_yellow)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = "Editar Perfil", color = Color.White)
+                Text(text = "Editar Perfil")
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -171,14 +172,22 @@ fun PerfilScreen(
                 }
             )
             Spacer(modifier = Modifier.height(10.dp))
-            CardOption(title = "Cambiar Tema", subtitle = "Tema Claro", onClick = { /* Lógica */ })
+            CardOption(
+                title = "Cambiar Tema",
+                subtitle = if (usuarioData?.isDarkMode == true) "Tema Oscuro" else "Tema Claro",
+                onClick = {
+                    val username = usuarioData?.username ?: ""
+                    val modoActual = usuarioData?.isDarkMode ?: false
+                    viewModel.actualizarTheme(username, modoActual)
+                }
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = onNavigateToChangePass,
                 modifier = Modifier.fillMaxWidth().height(45.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mustard_yellow)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(text = "Cambiar contraseña")

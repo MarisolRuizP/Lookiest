@@ -12,14 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Azul,
+    primary = Azul50,
     secondary = Rosa,
-    tertiary = Amarillo,
-    background = Negro,
-    surface = Negro,
+    tertiary = Amarillo50,
+    background = NegroFondo,
+    surface = GrisSuperficie,
     onPrimary = Blanco,
+    onSecondary = GrisElevado,
     onBackground = Blanco,
-    onSurface = Blanco
+    onSurface = BlancoSuave,
+    onTertiaryContainer = Negro
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -31,7 +33,8 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Blanco,
     onSecondary = Blanco,
     onBackground = Negro,
-    onSurface = Negro
+    onSurface = Negro,
+    onTertiaryContainer = Negro
 )
 
 @Composable
@@ -41,18 +44,14 @@ fun LookiestTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val colors = if (darkTheme) {
+        DarkColorScheme
+    } else {
+        LightColorScheme
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colors,
         typography = Typography,
         content = content
     )

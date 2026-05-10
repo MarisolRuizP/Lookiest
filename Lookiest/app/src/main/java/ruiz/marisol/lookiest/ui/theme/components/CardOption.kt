@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,7 @@ fun CardOption(title: String, subtitle: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(15.dp),
-        color = Color.White,
+        color = MaterialTheme.colorScheme.onSecondary,
         shadowElevation = 1.dp
     ) {
         Row(
@@ -38,7 +39,7 @@ fun CardOption(title: String, subtitle: String, onClick: () -> Unit) {
         ) {
             Column {
                 Text(text = title, fontWeight = FontWeight.Bold)
-                Text(text = subtitle, color = Color(0xFF005681), fontSize = 12.sp)
+                Text(text = subtitle, color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
             }
             Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null)
         }

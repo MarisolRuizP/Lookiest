@@ -2,6 +2,7 @@ package ruiz.marisol.lookiest.ui.theme.components
 
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -15,6 +16,6 @@ import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 fun LookiestTopBar() {
     CenterAlignedTopAppBar(
         title  = { Text("Lookiest", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BlancoFondo)
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
     )
 }

@@ -13,5 +13,6 @@ data class Usuario(
     val genero: String = "",
     val fechaNacimiento: String = "",
     val biometriaActiva: Boolean = false,
-    val fotoPerfil: String? = null
+    val fotoPerfil: String? = null,
+    val isDarkMode: Boolean = false
 )

@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -44,7 +46,10 @@ class MainActivity : FragmentActivity() {
         )[ClosetViewModel::class.java]
 
         setContent {
-            LookiestTheme {
+            val usuarioData by authViewModel.usuarioLogueado.collectAsState()
+            val esTemaOscuro = usuarioData?.isDarkMode ?: false
+
+            LookiestTheme(darkTheme = esTemaOscuro){
                 AppNavigation(
                     authViewModel = authViewModel,
                     closetViewModel = closetViewModel

@@ -16,6 +16,23 @@ class AuthViewModel(
     private val dataStore: DataStoreManager
 ) : ViewModel() {
 
+    private val _usuarioLogueado = MutableStateFlow<Usuario?>(null)
+    private val _biometriaHabilitada = MutableStateFlow(false)
+    private val _isDarkMode = MutableStateFlow(false)
+
+
+    init {
+        viewModelScope.launch {
+            dataStore.usernameFlow.collect { name ->
+                if (!name.isNullOrEmpty()) {
+                    val user = userDao.getUserByUsername(name)
+                    _usuarioLogueado.value = user
+                    _biometriaHabilitada.value = user?.biometriaActiva ?: false
+                }
+            }
+        }
+    }
+    val usuarioLogueado: StateFlow<Usuario?> = _usuarioLogueado
     val isLoggedIn = dataStore.isLoggedInFlow.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), false
     )
@@ -25,13 +42,8 @@ class AuthViewModel(
     val password = dataStore.passwordFlow.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), ""
     )
-
-    private val _biometriaHabilitada = MutableStateFlow(false)
-
     val biometriaHabilitada: StateFlow<Boolean> = _biometriaHabilitada
-
-    private val _usuarioLogueado = MutableStateFlow<Usuario?>(null)
-    val usuarioLogueado: StateFlow<Usuario?> = _usuarioLogueado
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode
 
     fun registrarEnRoom(entidad: Usuario) {
         viewModelScope.launch {
@@ -74,9 +86,14 @@ class AuthViewModel(
 
     fun updatePassword(nuevaPass: String) {
         viewModelScope.launch {
-            val currentUsername = username.value
-            userDao.updatePasswordByUsername(currentUsername, nuevaPass)
-            dataStore.saveSession(currentUsername, nuevaPass)
+            val currentUsername = usuarioLogueado.value?.username ?: username.value
+
+            if (currentUsername.isNotEmpty()) {
+                userDao.updatePasswordByUsername(currentUsername, nuevaPass)
+                dataStore.saveSession(currentUsername, nuevaPass)
+                val usuarioActualizado = userDao.getUserByUsername(currentUsername)
+                _usuarioLogueado.value = usuarioActualizado
+            }
         }
     }
 
@@ -119,6 +136,23 @@ class AuthViewModel(
             } else {
                 onResult(false)
             }
+        }
+    }
+
+    fun actualizarTheme(username: String, currentMode: Boolean) {
+        viewModelScope.launch {
+            val nuevoModo = !currentMode
+            userDao.updateTheme(username, nuevoModo)
+            _isDarkMode.value = nuevoModo
+            cargarDatosUsuario(username)
+        }
+    }
+
+    fun verificarSiExiste(username: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val usuario = userDao.getUserByUsername(username.trim())
+            val existe = usuario != null
+            onResult(existe)
         }
     }
 }

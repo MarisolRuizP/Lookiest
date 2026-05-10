@@ -74,6 +74,9 @@ fun AppNavigation(
         composable(Screen.Login.route) {
             LoginScreen(
                 viewModel           = authViewModel,
+                onNavigateToForgetPass = {
+                    navController.navigate("${Screen.CambiarContra.route}/true")
+                },
                 onNavigateToRegister = { navController.navigate(Screen.Registro.route) },
                 onLoginSuccess = {
                     navController.navigate(Screen.MiCloset.route) {
@@ -173,7 +176,6 @@ fun AppNavigation(
         }
 
         // Detalles outfit
-        // Detalles outfit
         composable(
             route     = Screen.DetallesOutfit.route,
             arguments = listOf(navArgument("outfitId") { type = NavType.IntType })
@@ -227,7 +229,7 @@ fun AppNavigation(
                 viewModel             = authViewModel,
                 onNavigateToEdit      = { navController.navigate(Screen.EditarPerfil.route) },
                 navController = navController,
-                onNavigateToChangePass = { navController.navigate(Screen.CambiarContra.route) },
+                onNavigateToChangePass = { navController.navigate("${Screen.CambiarContra.route}/false") },
                 onLogout = {
                     navController.navigate(Screen.Login.route) { popUpTo(0) }
                 }
@@ -241,9 +243,13 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.CambiarContra.route) {
+        composable("${Screen.CambiarContra.route}/{esOlvido}") { backStackEntry ->
+            val esOlvido = backStackEntry.arguments?.getString("esOlvido")?.toBoolean() ?: false
+
             CambiarContraScreen(
-                viewModel      = authViewModel,
+                viewModel = authViewModel,
+                esOlvido = esOlvido,
+                onNavigateToHome = {navController.navigate(Screen.MiCloset.route)},
                 onNavigateBack = { navController.popBackStack() }
             )
         }

@@ -5,6 +5,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -65,8 +68,8 @@ fun EditarPerfilScreen(
     val currentUserName by viewModel.username.collectAsState()
 
     var user by remember { mutableStateOf(currentUserName) }
-    var nombre by remember { mutableStateOf("Marisol Ruiz") }
-    var correo by remember { mutableStateOf("marisolsol@gmail.com") }
+    var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
 
     var mostrarDialogo by remember { mutableStateOf(false) }
     val currentUserNameSession by viewModel.username.collectAsState()
@@ -96,7 +99,7 @@ fun EditarPerfilScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
 
         Column(
@@ -108,13 +111,17 @@ fun EditarPerfilScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                val esOscuro = isSystemInDarkTheme()
+
                 Image(
                     painter = painterResource(id = R.drawable.lookiest_logo),
                     contentDescription = null,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(40.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
                 )
+
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -140,7 +147,7 @@ fun EditarPerfilScreen(
                         .background(Color.White, CircleShape)
                         .size(30.dp)
                 ) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onTertiaryContainer)
                 }
             }
 
@@ -159,14 +166,14 @@ fun EditarPerfilScreen(
                 Button(
                     onClick = onNavigateBack,
                     modifier = Modifier.weight(1f).height(45.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA63968)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     shape = RoundedCornerShape(20.dp)
                 ) { Text("Descartar") }
 
                 Button(
                     onClick = { mostrarDialogo = true },
                     modifier = Modifier.weight(1f).height(45.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mustard_yellow)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                     shape = RoundedCornerShape(20.dp)
                 ) { Text("Guardar") }
             }

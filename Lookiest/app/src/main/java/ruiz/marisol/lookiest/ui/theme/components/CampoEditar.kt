@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -20,13 +21,13 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CampoEditar(label: String, value: String, onValueChange: (String) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(text = label, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+        Text(text = label, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(4.dp))
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
             shadowElevation = 4.dp,
-            color = Color.Transparent
+            color = MaterialTheme.colorScheme.surface
         ) {
             TextField(
                 value = value,
@@ -34,8 +35,8 @@ fun CampoEditar(label: String, value: String, onValueChange: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(10.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF2F2F2),
-                    unfocusedContainerColor = Color(0xFFF2F2F2),
+                    focusedContainerColor = MaterialTheme.colorScheme.onSecondary,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.onSecondary,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 )

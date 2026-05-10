@@ -25,26 +25,24 @@ fun LookiestBottomBar(
         "Perfil"        to Icons.Default.Person
     )
 
-    NavigationBar(containerColor = Color.White) {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
         items.forEachIndexed { i, (label, icon) ->
             NavigationBarItem(
                 selected = i == selected,
                 onClick  = {
                     when (i) {
                         0 -> navController.navigate(Screen.MisOutfits.route)
-                        1-> navController.navigate(Screen.OutfitDeHoy.route)
                         2 -> navController.navigate(Screen.MiCloset.route)
                         3 -> navController.navigate(Screen.Calendario.route)
                         4 -> navController.navigate(Screen.Perfil.route)
-                        
                     }
                 },
                 icon   = { Icon(icon, contentDescription = label) },
                 label  = { Text(label, fontSize = 9.sp) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Azul,
-                    selectedTextColor = Azul,
-                    indicatorColor    = BlancoFondo
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor    = MaterialTheme.colorScheme.background
                 )
             )
         }

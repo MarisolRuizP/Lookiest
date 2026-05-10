@@ -34,5 +34,8 @@ interface UsuarioDao {
 
     @Query("UPDATE usuarios SET biometriaActiva = :estado WHERE username = :username")
     suspend fun updateBiometria(username: String, estado: Boolean)
+
+    @Query("UPDATE usuarios SET isDarkMode = :isDark WHERE username = :username")
+    suspend fun updateTheme(username: String, isDark: Boolean)
 }
 
