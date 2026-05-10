@@ -32,11 +32,29 @@ fun EditarOutfitScreen(
 ) {
     // Estado pre-cargado con los datos del outfit existente
     var nombre               by remember { mutableStateOf(outfitInicial.nombre) }
-    var prendasSeleccionadas by remember { mutableStateOf(outfitInicial.prendas.map { it.id }.toSet()) }
     var esPublico            by remember { mutableStateOf(outfitInicial.esPublico) }
-    var etiquetas            by remember { mutableStateOf(outfitInicial.etiquetas) }
     var etiquetaTexto        by remember { mutableStateOf("") }
     var mostrarDialogoGuardar by remember { mutableStateOf(false) }
+
+    var prendasSeleccionadas by remember {
+        mutableStateOf(
+            outfitInicial.prendas
+                .split(",")
+                .mapNotNull { it.trim().toIntOrNull() }
+                .toSet()
+        )
+    }
+
+    var etiquetas by remember {
+        mutableStateOf(
+            outfitInicial.etiquetas
+                .split(",")
+                .filter { it.isNotBlank() }
+        )
+    }
+
+    val allPrendas by viewModel.prendas.collectAsState(initial = emptyList())
+
 
     if (mostrarDialogoGuardar) {
         ConfirmacionDialog(
@@ -44,13 +62,13 @@ fun EditarOutfitScreen(
             onCancelar  = { mostrarDialogoGuardar = false },
             onConfirmar = {
                 mostrarDialogoGuardar = false
-                viewModel.actualizarOutfit(
-                    outfitId   = outfitInicial.id,
-                    nombre     = nombre.ifBlank { "Mi Outfit" },
-                    prendasIds = prendasSeleccionadas,
-                    esPublico  = esPublico,
-                    etiquetas  = etiquetas
+                val outfitActualizado = outfitInicial.copy(
+                    nombre    = nombre.ifBlank { "Mi Outfit" },
+                    prendas   = prendasSeleccionadas.joinToString(","),
+                    esPublico = esPublico,
+                    etiquetas = etiquetas.joinToString(",")
                 )
+                viewModel.actualizarOutfit(outfitActualizado)
                 onGuardado()
             }
         )
@@ -58,7 +76,7 @@ fun EditarOutfitScreen(
 
     Scaffold(
         topBar    = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 1) },
+//        bottomBar = { LookiestBottomBar(selected = 1, navController = navController) },
         containerColor = BlancoFondo
     ) { padding ->
         Column(
@@ -88,7 +106,7 @@ fun EditarOutfitScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier              = Modifier.weight(1f)
             ) {
-                items(viewModel.prendas) { prenda ->
+                items(allPrendas) { prenda ->
                     val seleccionada = prenda.id in prendasSeleccionadas
                     PrendaSeleccionableCard(
                         prenda       = prenda,
@@ -210,23 +228,23 @@ fun EditarOutfitScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun PreviewEditarOutfit() {
-    val prendasMock = listOf(
-        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara", talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
-        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",     talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
-    )
-    val outfitMock = Outfit(
-        id        = 1,
-        nombre    = "Look Rojo Otoñal",
-        prendas   = prendasMock,
-        esPublico = false,
-        etiquetas = listOf("Casual", "Otoño", "Rojo"),
-        creadoPor = "Mi (Marisol_Ruiz)"
-    )
-    LookiestTheme {
-        EditarOutfitScreen(
-            outfitInicial = outfitMock,
-            onGuardado    = {},
-            onDescartado  = {}
-        )
-    }
+//    val prendasMock = listOf(
+//        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara", talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
+//        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",     talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
+//    )
+//    val outfitMock = Outfit(
+//        id        = 1,
+//        nombre    = "Look Rojo Otoñal",
+//        prendas   = prendasMock,
+//        esPublico = false,
+//        etiquetas = listOf("Casual", "Otoño", "Rojo"),
+//        creadoPor = "Mi (Marisol_Ruiz)"
+//    )
+//    LookiestTheme {
+//        EditarOutfitScreen(
+//            outfitInicial = outfitMock,
+//            onGuardado    = {},
+//            onDescartado  = {}
+//        )
+//    }
 }

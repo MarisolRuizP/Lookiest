@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import ruiz.marisol.lookiest.data.DataStoreManager
-import ruiz.marisol.lookiest.data.DB.LookiestDatabase
+import ruiz.marisol.lookiest.data.LookiestDatabase
 import ruiz.marisol.lookiest.navigation.AppNavigation
 import ruiz.marisol.lookiest.ui.theme.LookiestTheme
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
@@ -17,15 +17,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val authViewModel = AuthViewModel(DataStoreManager(this))
 
         val database = LookiestDatabase.getDatabase(applicationContext)
+
+        val authViewModel = ViewModelProvider(
+            this,
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AuthViewModel(DataStoreManager(applicationContext)) as T
+                }
+            }
+        )[AuthViewModel::class.java]
 
         val closetViewModel = ViewModelProvider(
             this,
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-
                     return ClosetViewModel(database.prendaDao(), database.outfitDao()) as T
                 }
             }

@@ -7,8 +7,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.data.DAO.OutfitDao
 import ruiz.marisol.lookiest.data.DAO.PrendaDao
 import ruiz.marisol.lookiest.data.Outfit
@@ -36,8 +38,18 @@ class ClosetViewModel(
     val formalidades get() = _formalidades
     val colores get() = _opcionesColores
 
-    val prendas: Flow<List<PrendaRopa>> = prendaDAO.obtenerTodasLasPrendas()
-    val outfits: Flow<List<Outfit>> = outfitDAO.obtenerTodosLosOutfits()
+    val prendas: StateFlow<List<PrendaRopa>> = prendaDAO.obtenerTodasLasPrendas()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    val outfits: StateFlow<List<Outfit>> = outfitDAO.obtenerTodosLosOutfits()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun agregarPrenda(prenda: PrendaRopa) {
         viewModelScope.launch {
@@ -82,10 +94,15 @@ class ClosetViewModel(
 
     fun prendasUsadasEn(fecha: String): List<PrendaRopa> {
         val outfitIds = usos.filter { it.fecha == fecha }.map { it.oufitId }
-        return outfits
+        return outfits.value
             .filter { it.id in outfitIds }
-            .flatMap { it.prendas }
-            .distinctBy { it.id }
+            .flatMap { outfit ->
+                outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
+            }
+            .distinct()
+            .let { outfitIds ->
+                prendas.value.filter {it.id in outfitIds}
+            }
     }
 
     fun agregarOutfit(outfit: Outfit) {

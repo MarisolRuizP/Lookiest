@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import kotlinx.coroutines.flow.filter
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
@@ -47,8 +48,12 @@ fun CrearOutfitScreen(
     var etiquetaTexto        by remember { mutableStateOf("") }
     var etiquetas            by remember { mutableStateOf(listOf<String>()) }
 
-    val prendasFiltradas = viewModel.prendas.filter {
-        busqueda.isBlank() || it.nombre.contains(busqueda, ignoreCase = true)
+    val allPrendas by viewModel.prendas.collectAsState(initial = emptyList())
+    val prendasFiltradas = remember(busqueda, allPrendas) {
+        if (busqueda.isBlank()) allPrendas
+        else allPrendas.filter {
+            it.nombre.contains(busqueda, ignoreCase = true)
+        }
     }
 
     Scaffold(
@@ -59,12 +64,15 @@ fun CrearOutfitScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    viewModel.agregarOutfit(
-                        nombre     = nombreOutfit.ifBlank { "Mi Outfit" },
-                        prendasIds = prendasSeleccionadas,
-                        esPublico  = esPublico,
-                        etiquetas  = etiquetas
+                    val nuevoFit = Outfit(
+                        id = 0,
+                        nombre = nombreOutfit.ifBlank { "Mi fit idk" },
+                        prendas = prendasSeleccionadas.joinToString(","),
+                        esPublico = esPublico,
+                        etiquetas = etiquetas.joinToString(","),
+                        creadoPor = "Mi"
                     )
+                    viewModel.agregarOutfit(nuevoFit)
                     onGuardar()
                 },
                 containerColor = Amarillo,
@@ -239,9 +247,9 @@ fun PrendaSeleccionableCard(
                         .background(Color(0xFFF5F5F7)),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (prenda.imagen != null) {
-                        Image(
-                            painter            = painterResource(id = prenda.imagen),
+                    if (!prenda.imagen.isNullOrEmpty()) {
+                        AsyncImage(
+                            model              = prenda.imagen,
                             contentDescription = prenda.nombre,
                             modifier           = Modifier.fillMaxSize(),
                             contentScale       = ContentScale.Fit
@@ -280,13 +288,15 @@ fun PrendaSeleccionableCard(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewCrearOutfit() {
-    LookiestTheme {
-        CrearOutfitScreen(
-            onGuardar   = {},
-            onDescartar = {}
-        )
-    }
-}
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//private fun PreviewCrearOutfit() {
+//    LookiestTheme {
+//        CrearOutfitScreen(
+//            viewModel     = androidx.lifecycle.viewmodel.compose.viewModel(),
+//            onGuardar     = {},
+//            onDescartar   = {},
+//            navController = androidx.navigation.compose.rememberNavController()
+//        )
+//    }
+//}

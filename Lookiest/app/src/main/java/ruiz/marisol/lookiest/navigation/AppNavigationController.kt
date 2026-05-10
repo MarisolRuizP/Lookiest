@@ -1,6 +1,8 @@
 package ruiz.marisol.lookiest.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +14,7 @@ import androidx.navigation.navArgument
 import ruiz.marisol.lookiest.ui.screens.DetalleOutfitScreen
 import ruiz.marisol.lookiest.ui.screens.OutfitsScreen
 import ruiz.marisol.lookiest.ui.theme.screens.AgregarPrendaScreen
+import ruiz.marisol.lookiest.ui.theme.screens.CalendarioScreen
 import ruiz.marisol.lookiest.ui.theme.screens.ClosetScreen
 import ruiz.marisol.lookiest.ui.theme.screens.DetallesPrendaScreen
 import ruiz.marisol.lookiest.ui.theme.screens.EditarPrendaScreen
@@ -40,6 +43,8 @@ sealed class Screen(val route: String) {
     object DetallesOutfit : Screen("detalles_outfit/{outfitId}") {
         fun createRoute(outfitId: Int) = "detalles_outfit/$outfitId"
     }
+
+    object Calendario : Screen("calendario")
 }
 
 
@@ -49,16 +54,17 @@ fun AppNavigation(
     closetViewModel: ClosetViewModel
 ) {
     val navController = rememberNavController()
+    val prendas by closetViewModel.prendas.collectAsState(initial = emptyList())
+    val outfits by closetViewModel.outfits.collectAsState(initial = emptyList())
 
     NavHost(
         navController = navController,
         startDestination = Screen.Login.route
     ) {
-
         //login
         composable(Screen.Login.route) {
             LoginScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 onNavigateToRegister = {
                     navController.navigate(Screen.Registro.route)
                 },
@@ -73,7 +79,7 @@ fun AppNavigation(
         //registro
         composable(Screen.Registro.route) {
             RegistroScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 onRegistrationComplete = {
                     navController.navigate(Screen.MiCloset.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
@@ -109,7 +115,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("prendaId") { type = NavType.IntType })
         ) { backStackEntry ->
             val prendaId = backStackEntry.arguments?.getInt("prendaId") ?: return@composable
-            val prenda = closetViewModel.prendas.find { it.id == prendaId } ?: return@composable
+            val prenda = prendas.find { it.id == prendaId } ?: return@composable
 
             DetallesPrendaScreen(
                 prenda = prenda,
@@ -126,7 +132,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("prendaId") { type = NavType.IntType })
         ) { backStackEntry ->
             val prendaId = backStackEntry.arguments?.getInt("prendaId") ?: return@composable
-            val prenda = closetViewModel.prendas.find { it.id == prendaId } ?: return@composable
+            val prenda = prendas.find { it.id == prendaId } ?: return@composable
 
             EditarPrendaScreen(
                 prendaInicial = prenda,
@@ -156,7 +162,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("outfitId") { type = NavType.IntType })
         ) { backStackEntry ->
             val outfitId = backStackEntry.arguments?.getInt("outfitId") ?: return@composable
-            val outfit   = closetViewModel.outfits.find { it.id == outfitId } ?: return@composable
+            val outfit   = outfits.find { it.id == outfitId } ?: return@composable
 
             DetalleOutfitScreen(
                 outfit = outfit,
@@ -168,7 +174,7 @@ fun AppNavigation(
 
         composable(Screen.Perfil.route) {
             PerfilScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 onNavigateToEdit = { navController.navigate("editar_perfil") },
                 onNavigateToChangePass = { navController.navigate("cambiar_contra") },
                 onLogout = {
@@ -181,16 +187,20 @@ fun AppNavigation(
 
         composable(Screen.EditarPerfil.route) {
             EditarPerfilScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 onNavigateBack = {navController.navigate("perfil")}
             )
         }
 
         composable(Screen.CambiarContra.route) {
             CambiarContraScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 onNavigateBack = {navController.navigate("perfil")}
             )
+        }
+
+        composable(Screen.Calendario.route) {
+            CalendarioScreen(viewModel = closetViewModel)
         }
     }
 }

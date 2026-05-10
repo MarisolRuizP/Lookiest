@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreHoriz
+import coil.compose.AsyncImage
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
@@ -59,9 +61,9 @@ fun PrendaCard(
                     .background(Blanco)
 
             ) {
-                if (prenda.imagen != null) {
-                    Image(
-                        painter = painterResource(id = prenda.imagen),
+                if (!prenda.imagen.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = prenda.imagen,
                         contentDescription = prenda.nombre,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
@@ -134,9 +136,6 @@ fun PrendaCard(
                         shape = RoundedCornerShape(20.dp)
                     )
                     .padding(horizontal = 8.dp, vertical = 2.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-                    .padding(horizontal = 10.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = prenda.categoria,
@@ -145,6 +144,7 @@ fun PrendaCard(
                     fontWeight = FontWeight.Medium
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

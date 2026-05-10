@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 import java.time.LocalDate
 import java.time.YearMonth
@@ -89,17 +90,14 @@ fun CalendarioScreen(viewModel: ClosetViewModel) {
                             modifier = Modifier.padding(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            prenda.imagen?.let {
-                                Image(
-                                    painter = painterResource(id = it),
+                            if (!prenda.imagen.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = prenda.imagen,
                                     contentDescription = prenda.nombre,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(56.dp)
-                                        .background(
-                                            Color(0xFFF5F5F5),
-                                            RoundedCornerShape(8.dp)
-                                        )
+                                        .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))

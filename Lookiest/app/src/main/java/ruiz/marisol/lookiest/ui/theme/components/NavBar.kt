@@ -33,7 +33,8 @@ fun LookiestBottomBar(
                     when (i) {
                         0 -> navController.navigate(Screen.MisOutfits.route)
                         2 -> navController.navigate(Screen.MiCloset.route)
-                        // 1, 3, 4 → agregar cuando tengas esas pantallas
+                        3 -> navController.navigate(Screen.Calendario.route)
+                        // 1, 4 → agregar cuando tengas esas pantallas
                     }
                 },
                 icon   = { Icon(icon, contentDescription = label) },

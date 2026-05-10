@@ -27,7 +27,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,11 +45,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ruiz.marisol.lookiest.R
-import ruiz.marisol.lookiest.data.DataStoreManager
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
 
 @Composable
@@ -205,19 +202,20 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                if (pass.isBlank()) {
-                    Toast.makeText(context, "Por favor, escribe tu contraseña", Toast.LENGTH_SHORT).show()
-                }
-
-                else if (isRegistered) {
-                    if (pass == password) {
-                        onLoginSuccess()
-                    } else {
-                        Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(context, "No tienes cuenta. Dale a Registrarme", Toast.LENGTH_SHORT).show()
-                }
+//                if (pass.isBlank()) {
+//                    Toast.makeText(context, "Por favor, escribe tu contraseña", Toast.LENGTH_SHORT).show()
+//                }
+//
+//                else if (isRegistered) {
+//                    if (pass == password) {
+//                        onLoginSuccess()
+//                    } else {
+//                        Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
+//                    }
+//                } else {
+//                    Toast.makeText(context, "No tienes cuenta. Dale a Registrarme", Toast.LENGTH_SHORT).show()
+//                }
+                onLoginSuccess() //just for now chat
             },
             modifier = Modifier.fillMaxWidth().height(49.dp),
             colors = ButtonDefaults.buttonColors(

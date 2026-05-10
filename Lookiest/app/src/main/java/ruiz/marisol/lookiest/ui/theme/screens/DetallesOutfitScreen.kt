@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
@@ -31,11 +33,17 @@ import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 @Composable
 fun DetallesOutfitScreen(
     outfit: Outfit,
-    viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: ClosetViewModel,
+    navController: NavController,
     onEditar: () -> Unit = {},
     onEliminarConfirmado: () -> Unit = {}
 ) {
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+
+    val etiquetasLista = outfit.etiquetas.split(",").filter { it.isNotBlank() }
+    val todasLasPrendas by viewModel.prendas.collectAsState(initial = emptyList())
+    val idsPrendas = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
+    val prendasDelOutfit = todasLasPrendas.filter { it.id in idsPrendas }
 
     if (mostrarDialogoEliminar) {
         ConfirmacionDialog(
@@ -43,7 +51,7 @@ fun DetallesOutfitScreen(
             onCancelar  = { mostrarDialogoEliminar = false },
             onConfirmar = {
                 mostrarDialogoEliminar = false
-                viewModel.eliminarOutfit(outfit.id)
+                viewModel.eliminarOutfit(outfit)
                 onEliminarConfirmado()
             }
         )
@@ -51,7 +59,7 @@ fun DetallesOutfitScreen(
 
     Scaffold(
         topBar    = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(selected = 1) },
+        bottomBar = { LookiestBottomBar(selected = 1, navController = navController) },
         containerColor = BlancoFondo
     ) { padding ->
         Column(
@@ -60,6 +68,7 @@ fun DetallesOutfitScreen(
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            Spacer(Modifier.height(8.dp))
             // Encabezado
             Row(
                 modifier = Modifier
@@ -70,10 +79,10 @@ fun DetallesOutfitScreen(
             ) {
                 Text("Detalles del Outfit", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Row {
-                    IconButton(onClick = { /* TODO: toggle favorito outfit */ }) {
+                    IconButton(onClick = { }) {
                         Icon(Icons.Outlined.FavoriteBorder, contentDescription = "Favorito", tint = Rosa)
                     }
-                    IconButton(onClick = { /* TODO: compartir outfit */ }) {
+                    IconButton(onClick = { }) {
                         Icon(Icons.Default.Share, contentDescription = "Compartir", tint = Amarillo)
                     }
                 }
@@ -94,18 +103,18 @@ fun DetallesOutfitScreen(
                     bgColor = Azul50,
                     textColor = Negro
                 )
-                outfit.etiquetas.forEach { tag ->
-                    InfoChip(texto = tag, bgColor = Azul50, textColor = Negro)
+                etiquetasLista.forEach { tag ->
+                    InfoChip(texto = tag.trim(), bgColor = Azul50, textColor = Negro)
                 }
             }
 
             // Estadística de uso
             Spacer(Modifier.height(14.dp))
-            EstadisticaRow(label = "Total de usos", valor = outfit.totalUsos)
-            Spacer(Modifier.height(14.dp))
+//            EstadisticaRow(label = "Total de usos", valor = outfit.totalUsos)
+//            Spacer(Modifier.height(14.dp)) idk
 
             // Lista de prendas
-            if (outfit.prendas.isEmpty()) {
+            if (prendasDelOutfit.isEmpty()) {
                 Box(
                     modifier         = Modifier.fillMaxWidth().height(80.dp),
                     contentAlignment = Alignment.Center
@@ -113,7 +122,7 @@ fun DetallesOutfitScreen(
                     Text("Sin prendas asignadas", color = Color.Gray, fontSize = 14.sp)
                 }
             } else {
-                outfit.prendas.forEach { prenda ->
+                prendasDelOutfit.forEach { prenda ->
                     PrendaOutfitRow(prenda = prenda)
                     Spacer(Modifier.height(8.dp))
                 }
@@ -163,9 +172,9 @@ fun PrendaOutfitRow(prenda: PrendaRopa) {
                     .background(Color(0xFFF5F5F7), RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (prenda.imagen != null) {
-                    Image(
-                        painter            = painterResource(id = prenda.imagen),
+                if (!prenda.imagen.isNullOrEmpty()) {
+                    AsyncImage(
+                        model              = prenda.imagen,
                         contentDescription = prenda.nombre,
                         modifier           = Modifier.fillMaxSize().padding(4.dp),
                         contentScale       = ContentScale.Fit
@@ -193,23 +202,23 @@ fun PrendaOutfitRow(prenda: PrendaRopa) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun PreviewDetallesOutfit() {
-    val prendasMock = listOf(
-        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara",     talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
-        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",          talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
-    )
-    val outfitMock = Outfit(
-        id        = 1,
-        nombre    = "Look Rojo Otoñal",
-        prendas   = prendasMock,
-        esPublico = false,
-        etiquetas = listOf("Casual", "Otoño", "Rojo", "Inspo", "2026"),
-        creadoPor = "Mi (Marisol_Ruiz)",
-        totalUsos = 3
-    )
-    LookiestTheme {
-        DetallesOutfitScreen(
-            outfit   = outfitMock,
-            onEditar = {}
-        )
-    }
+//    val prendasMock = listOf(
+//        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara",     talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
+//        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",          talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
+//    )
+//    val outfitMock = Outfit(
+//        id        = 1,
+//        nombre    = "Look Rojo Otoñal",
+//        prendas   = prendasMock,
+//        esPublico = false,
+//        etiquetas = listOf("Casual", "Otoño", "Rojo", "Inspo", "2026"),
+//        creadoPor = "Mi (Marisol_Ruiz)",
+//        totalUsos = 3
+//    )
+//    LookiestTheme {
+//        DetallesOutfitScreen(
+//            outfit   = outfitMock,
+//            onEditar = {}
+//        )
+//    }
 }

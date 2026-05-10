@@ -4,16 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import ruiz.marisol.lookiest.data.local.dao.OutfitDao
-import ruiz.marisol.lookiest.data.local.dao.PrendaDao
-import ruiz.marisol.lookiest.data.local.entities.OutfitEntity
-import ruiz.marisol.lookiest.entities.PrendaEntity
+import androidx.room.TypeConverters
+import ruiz.marisol.lookiest.data.DAO.OutfitDao
+import ruiz.marisol.lookiest.data.DAO.PrendaDao
 
 @Database(
-    entities = [PrendaEntity::class, OutfitEntity::class],
+    entities = [PrendaRopa::class, Outfit::class],
     version = 1,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class LookiestDatabase : RoomDatabase() {
 
     abstract fun prendaDao(): PrendaDao
