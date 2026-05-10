@@ -1,5 +1,8 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -83,6 +86,14 @@ fun EditarPerfilScreen(
         }
     }
 
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            viewModel.actualizarFotoPerfil(usuarioData?.email ?: "", it.toString())
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = BlancoFondo
@@ -122,7 +133,9 @@ fun EditarPerfilScreen(
                     placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
                 )
                 IconButton(
-                    onClick = { /* Abrir galería */ },
+                    onClick = {
+                        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                     modifier = Modifier
                         .background(Color.White, CircleShape)
                         .size(30.dp)

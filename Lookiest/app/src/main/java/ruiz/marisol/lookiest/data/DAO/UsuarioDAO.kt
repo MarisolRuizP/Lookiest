@@ -31,5 +31,8 @@ interface UsuarioDao {
 
     @Query("SELECT * FROM usuarios WHERE email = :identificador OR username = :identificador LIMIT 1")
     suspend fun getUserByIdentifier(identificador: String): Usuario?
+
+    @Query("UPDATE usuarios SET biometriaActiva = :estado WHERE username = :username")
+    suspend fun updateBiometria(username: String, estado: Boolean)
 }
 

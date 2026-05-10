@@ -26,10 +26,13 @@ class AuthViewModel(
         viewModelScope, SharingStarted.WhileSubscribed(5000), ""
     )
 
+    private val _biometriaHabilitada = MutableStateFlow(false)
+
+    val biometriaHabilitada: StateFlow<Boolean> = _biometriaHabilitada
+
     private val _usuarioLogueado = MutableStateFlow<Usuario?>(null)
     val usuarioLogueado: StateFlow<Usuario?> = _usuarioLogueado
 
-    // --- REGISTRO ---
     fun registrarEnRoom(entidad: Usuario) {
         viewModelScope.launch {
             userDao.registrarUsuario(entidad)
@@ -43,7 +46,6 @@ class AuthViewModel(
         }
     }
 
-    // --- LOGIN ---
     fun loginConRoom(identificador: String, pass: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val usuario = userDao.getUserByIdentifier(identificador)
@@ -57,7 +59,6 @@ class AuthViewModel(
         }
     }
 
-    // --- CIERRE DE SESIÓN ---
     fun logout() {
         viewModelScope.launch {
             dataStore.logout()
@@ -83,6 +84,41 @@ class AuthViewModel(
         viewModelScope.launch {
             userDao.updateFotoPerfil(email, nuevaUri)
             cargarDatosUsuario(username.value)
+        }
+    }
+
+    fun verificarBiometria(userName: String) {
+        viewModelScope.launch {
+            val usuario = userDao.getUserByUsername(userName)
+            _biometriaHabilitada.value = usuario?.biometriaActiva ?: false
+        }
+    }
+
+    fun actualizarBiometria(username: String, nuevoEstado: Boolean) {
+        viewModelScope.launch {
+            userDao.updateBiometria(username, nuevoEstado)
+            val usuarioActualizado = userDao.getUserByUsername(username)
+            _usuarioLogueado.value = usuarioActualizado
+            _biometriaHabilitada.value = nuevoEstado
+        }
+    }
+
+    fun loginConBiometria(onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val identificador = username.value
+            if (identificador.isNotEmpty()) {
+                val usuario = userDao.getUserByUsername(identificador)
+                if (usuario != null) {
+                    dataStore.saveSession(usuario.username, usuario.contrasena)
+                    _usuarioLogueado.value = usuario
+
+                    onResult(true)
+                } else {
+                    onResult(false)
+                }
+            } else {
+                onResult(false)
+            }
         }
     }
 }

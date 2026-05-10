@@ -74,9 +74,7 @@ fun PerfilScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
-        // Si el usuario seleccionó una imagen (uri no es nulo)
         uri?.let {
-            // Guardamos la URI en la base de datos
             viewModel.actualizarFotoPerfil(usuarioData?.email ?: "", it.toString())
         }
     }
@@ -161,7 +159,17 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            CardOption(title = "Biometría", subtitle = "Desactivar", onClick = { /* Lógica */ })
+            CardOption(
+                title = "Biometría",
+                subtitle = if (usuarioData?.biometriaActiva == true) "Desactivar" else "Activar",
+                onClick = {
+                    val usernameActual = usuarioData?.username ?: ""
+                    val estadoActual = usuarioData?.biometriaActiva ?: false
+                    viewModel.actualizarBiometria(usernameActual, !estadoActual)
+                    val mensaje = if (!estadoActual) "Biometría activada" else "Biometría desactivada"
+                    Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                }
+            )
             Spacer(modifier = Modifier.height(10.dp))
             CardOption(title = "Cambiar Tema", subtitle = "Tema Claro", onClick = { /* Lógica */ })
 

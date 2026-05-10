@@ -1,6 +1,9 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,8 +45,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.ui.theme.BlancoFondo
+import ruiz.marisol.lookiest.ui.theme.components.BiometricHelper
 import ruiz.marisol.lookiest.ui.theme.components.CampoContra
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
 
@@ -65,6 +70,17 @@ fun CambiarContraScreen(
     var visible1 by remember { mutableStateOf(false) }
     var visible2 by remember { mutableStateOf(false) }
     var visible3 by remember { mutableStateOf(false) }
+
+    val usuarioData by viewModel.usuarioLogueado.collectAsState()
+    val biometricHelper = remember { BiometricHelper(context) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            viewModel.actualizarFotoPerfil(usuarioData?.email ?: "", it.toString())
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -91,17 +107,21 @@ fun CambiarContraScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Box(contentAlignment = Alignment.BottomEnd) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = null,
+                AsyncImage(
+                    model = usuarioData?.fotoPerfil,
+                    contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape)
                         .background(Color.LightGray),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
                 )
                 IconButton(
-                    onClick = { /* Abrir galería */ },
+                    onClick = {
+                        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                     modifier = Modifier
                         .background(Color.White, CircleShape)
                         .size(30.dp)
@@ -118,13 +138,30 @@ fun CambiarContraScreen(
                     value = passAnterior,
                     onValueChange = { passAnterior = it },
                     isVisible = visible1,
-                    onToggleVisibility = { visible1 = !visible1 },
+                    onToggleVisibility = {
+                        if (usuarioData?.biometriaActiva == true) {
+                            biometricHelper.lanzarBiometria(
+                                onSuccess = {
+                                    visible1 = !visible1
+                                },
+                                onError = { error ->
+                                    Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Debes activar la biometría en tu perfil para ver este campo",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    },
                     onIconClick = {
-                        Toast.makeText(context, "Usa tu huella para ver la contraseña", Toast.LENGTH_SHORT).show()
+                        if (usuarioData?.biometriaActiva == true) {
+                            Toast.makeText(context, "Sensor de huella activado...", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 )
-
-
 
                 CampoContra(
                     label = "Contraseña Nueva",

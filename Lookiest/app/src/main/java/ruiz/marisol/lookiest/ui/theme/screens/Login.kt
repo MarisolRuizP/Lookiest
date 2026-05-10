@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ruiz.marisol.lookiest.R
+import ruiz.marisol.lookiest.ui.theme.components.BiometricHelper
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
 
 @Composable
@@ -59,11 +61,19 @@ fun LoginScreen(
     val userName by viewModel.username.collectAsState()
     val isRegistered by viewModel.isLoggedIn.collectAsState()
     val password by viewModel.password.collectAsState()
+    val biometriaActiva by viewModel.biometriaHabilitada.collectAsState()
 
     val context = LocalContext.current
     var user by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
     var passVisible by remember { mutableStateOf(false) }
+    val biometricHelper = remember { BiometricHelper(context) }
+
+    LaunchedEffect(userName) {
+        if (userName.isNotEmpty()) {
+            viewModel.verificarBiometria(userName)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -212,7 +222,7 @@ fun LoginScreen(
                             } else {
                                 Toast.makeText(
                                     context,
-                                    "Usuario o contraseña incorrectos",
+                                    "Contraseña incorrecta",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -249,23 +259,45 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Button(
-            onClick = {
-                if (isRegistered) {
-                    // Lógica de biometría para huella dactilar
-                } else {
-                    onNavigateToRegister()
-                }
-            },
-            modifier = Modifier.fillMaxWidth().height(49.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(id = R.color.azul)
-            )
-        ) {
-            Text(
-                fontSize = 17.sp,
-                text = if (isRegistered) "Usar huella" else "Registrarme"
-            )
+        if (isRegistered && biometriaActiva) {
+            Button(
+                onClick = {
+                    biometricHelper.lanzarBiometria(
+                        onSuccess = {
+                            viewModel.loginConBiometria { success ->
+                                if (success) onLoginSuccess()
+                            }
+                        },
+                        onError = { error ->
+                            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(49.dp)
+                    .padding(vertical = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(id = R.color.azul)
+                )
+            ) {
+                Text(fontSize = 17.sp, text = "Usar huella")
+            }
+        }
+
+        if (!isRegistered) {
+            Button(
+                onClick = { onNavigateToRegister() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(49.dp)
+                    .padding(vertical = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(id = R.color.azul)
+                )
+            ) {
+                Text(fontSize = 17.sp, text = "Registrarme")
+            }
         }
     }
 }
