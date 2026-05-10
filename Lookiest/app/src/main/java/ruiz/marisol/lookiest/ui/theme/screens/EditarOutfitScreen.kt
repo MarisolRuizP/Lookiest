@@ -1,9 +1,5 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,64 +11,55 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import kotlinx.coroutines.flow.filter
+import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
-import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.*
 import ruiz.marisol.lookiest.ui.theme.components.*
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 
-
 @Composable
-fun CrearOutfitScreen(
+fun EditarOutfitScreen(
+    outfitInicial: Outfit,
     viewModel: ClosetViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-    onGuardar: () -> Unit = {},
-    onDescartar: () -> Unit = {},
-    navController: NavController
+    onGuardado:   () -> Unit = {},
+    onDescartado: () -> Unit = {}
 ) {
-    var busqueda             by remember { mutableStateOf("") }
-    var prendasSeleccionadas by remember { mutableStateOf(setOf<Int>()) }
-    var nombreOutfit         by remember { mutableStateOf("") }
-    var esPublico            by remember { mutableStateOf(false) }
+    // Estado pre-cargado con los datos del outfit existente
+    var nombre               by remember { mutableStateOf(outfitInicial.nombre) }
+    var prendasSeleccionadas by remember { mutableStateOf(outfitInicial.prendas.map { it.id }.toSet()) }
+    var esPublico            by remember { mutableStateOf(outfitInicial.esPublico) }
+    var etiquetas            by remember { mutableStateOf(outfitInicial.etiquetas) }
     var etiquetaTexto        by remember { mutableStateOf("") }
-    var etiquetas            by remember { mutableStateOf(listOf<String>()) }
+    var mostrarDialogoGuardar by remember { mutableStateOf(false) }
 
-    val prendasFiltradas = viewModel.prendas.filter {
-        busqueda.isBlank() || it.nombre.contains(busqueda, ignoreCase = true)
+    if (mostrarDialogoGuardar) {
+        ConfirmacionDialog(
+            mensaje     = "¿Deseas guardar los cambios?",
+            onCancelar  = { mostrarDialogoGuardar = false },
+            onConfirmar = {
+                mostrarDialogoGuardar = false
+                viewModel.actualizarOutfit(
+                    outfitId   = outfitInicial.id,
+                    nombre     = nombre.ifBlank { "Mi Outfit" },
+                    prendasIds = prendasSeleccionadas,
+                    esPublico  = esPublico,
+                    etiquetas  = etiquetas
+                )
+                onGuardado()
+            }
+        )
     }
 
     Scaffold(
-        topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(
-            selected = 0, navController) },
-        containerColor = BlancoFondo,
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    viewModel.agregarOutfit(
-                        nombre     = nombreOutfit.ifBlank { "Mi Outfit" },
-                        prendasIds = prendasSeleccionadas,
-                        esPublico  = esPublico,
-                        etiquetas  = etiquetas
-                    )
-                    onGuardar()
-                },
-                containerColor = Amarillo,
-                contentColor   = Color.White,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Guardar Outfit", fontWeight = FontWeight.Bold) }
-            )
-        }
+        topBar    = { LookiestTopBar() },
+        bottomBar = { LookiestBottomBar(selected = 1) },
+        containerColor = BlancoFondo
     ) { padding ->
         Column(
             modifier = Modifier
@@ -80,7 +67,7 @@ fun CrearOutfitScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(
-                "Crear Outfit",
+                "Editar Outfit",
                 fontSize   = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier   = Modifier.padding(bottom = 10.dp)
@@ -88,37 +75,20 @@ fun CrearOutfitScreen(
 
             LookiestTextField(
                 label         = "Nombre del Outfit",
-                value         = nombreOutfit,
-                onValueChange = { nombreOutfit = it }
+                value         = nombre,
+                onValueChange = { nombre = it }
             )
 
             Spacer(Modifier.height(10.dp))
 
-            OutlinedTextField(
-                value         = busqueda,
-                onValueChange = { busqueda = it },
-                placeholder   = { Text("Buscar...") },
-                leadingIcon   = { Icon(Icons.Default.Search, contentDescription = null) },
-                shape         = RoundedCornerShape(50),
-                modifier      = Modifier.fillMaxWidth(),
-                singleLine    = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor   = Color.White,
-                    unfocusedBorderColor    = Color(0xFFD1D1D6),
-                    focusedBorderColor      = Rosa
-                )
-            )
-
-            Spacer(Modifier.height(12.dp))
-
+            // Grid con todas las prendas del closet; las del outfit ya vienen marcadas
             LazyVerticalGrid(
                 columns               = GridCells.Fixed(2),
                 verticalArrangement   = Arrangement.spacedBy(10.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier              = Modifier.weight(1f)
             ) {
-                items(prendasFiltradas) { prenda ->
+                items(viewModel.prendas) { prenda ->
                     val seleccionada = prenda.id in prendasSeleccionadas
                     PrendaSeleccionableCard(
                         prenda       = prenda,
@@ -170,7 +140,7 @@ fun CrearOutfitScreen(
                         etiquetaTexto = ""
                     }
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar", tint = Rosa)
+                    Icon(Icons.Default.Add, contentDescription = null, tint = Rosa)
                 }
                 OutlinedTextField(
                     value         = etiquetaTexto,
@@ -208,85 +178,55 @@ fun CrearOutfitScreen(
                 }
             }
 
-            Spacer(Modifier.height(70.dp))
+            Spacer(Modifier.height(12.dp))
+
+            // Botones Descartar / Guardar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick  = onDescartado,
+                    colors   = ButtonDefaults.buttonColors(containerColor = Rosa),
+                    shape    = RoundedCornerShape(50),
+                    modifier = Modifier.weight(1f).height(48.dp)
+                ) { Text("Descartar", fontWeight = FontWeight.Bold) }
+
+                Button(
+                    onClick  = { mostrarDialogoGuardar = true },
+                    colors   = ButtonDefaults.buttonColors(containerColor = Amarillo),
+                    shape    = RoundedCornerShape(50),
+                    modifier = Modifier.weight(1f).height(48.dp)
+                ) { Text("Guardar", fontWeight = FontWeight.Bold) }
+            }
+
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
 
-// ── Tarjeta de prenda seleccionable (compartida con EditarOutfit) ──────────
-
-@Composable
-fun PrendaSeleccionableCard(
-    prenda: PrendaRopa,
-    seleccionada: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        shape  = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .border(2.dp, if (seleccionada) Rosa else Color.Transparent, RoundedCornerShape(14.dp))
-    ) {
-        Box {
-            Column(modifier = Modifier.padding(8.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFF5F5F7)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (prenda.imagen != null) {
-                        Image(
-                            painter            = painterResource(id = prenda.imagen),
-                            contentDescription = prenda.nombre,
-                            modifier           = Modifier.fillMaxSize(),
-                            contentScale       = ContentScale.Fit
-                        )
-                    } else {
-                        Icon(
-                            Icons.Default.Checkroom,
-                            contentDescription = null,
-                            tint     = Color.LightGray,
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
-                }
-                Spacer(Modifier.height(4.dp))
-                Text(prenda.nombre,    fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1)
-                Text(prenda.categoria, fontSize = 10.sp, color = Color.Gray)
-            }
-
-            if (seleccionada) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .size(20.dp)
-                        .background(Rosa, shape = RoundedCornerShape(50))
-                ) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = null,
-                        tint     = Color.White,
-                        modifier = Modifier.size(14.dp).align(Alignment.Center)
-                    )
-                }
-            }
-        }
-    }
-}
+// ── Preview ───────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun PreviewCrearOutfit() {
+private fun PreviewEditarOutfit() {
+    val prendasMock = listOf(
+        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara", talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
+        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",     talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
+    )
+    val outfitMock = Outfit(
+        id        = 1,
+        nombre    = "Look Rojo Otoñal",
+        prendas   = prendasMock,
+        esPublico = false,
+        etiquetas = listOf("Casual", "Otoño", "Rojo"),
+        creadoPor = "Mi (Marisol_Ruiz)"
+    )
     LookiestTheme {
-        CrearOutfitScreen(
-            onGuardar   = {},
-            onDescartar = {}
+        EditarOutfitScreen(
+            outfitInicial = outfitMock,
+            onGuardado    = {},
+            onDescartado  = {}
         )
     }
 }

@@ -13,6 +13,7 @@ import ruiz.marisol.lookiest.data.DAO.OutfitDao
 import ruiz.marisol.lookiest.data.DAO.PrendaDao
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
+import ruiz.marisol.lookiest.data.UsoOutfit
 
 class ClosetViewModel(
     private val prendaDAO : PrendaDao,
@@ -62,6 +63,29 @@ class ClosetViewModel(
             val prendaModificada = prenda.copy(favorito = !prenda.favorito)
             prendaDAO.actualizarPrenda(prendaModificada)
         }
+    }
+
+    var usos by mutableStateOf(listOf<UsoOutfit>())
+        private set
+
+    fun registrarUso(outfitId: Int, fecha: String) {
+        usos = usos + UsoOutfit(
+            id = usos.size +1,
+            oufitId = outfitId,
+            fecha = fecha
+        )
+    }
+
+    fun eliminarUso(id: Int) {
+        usos = usos.filter { it.id != id }
+    }
+
+    fun prendasUsadasEn(fecha: String): List<PrendaRopa> {
+        val outfitIds = usos.filter { it.fecha == fecha }.map { it.oufitId }
+        return outfits
+            .filter { it.id in outfitIds }
+            .flatMap { it.prendas }
+            .distinctBy { it.id }
     }
 
     fun agregarOutfit(outfit: Outfit) {
