@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -52,6 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ruiz.marisol.lookiest.R
+import ruiz.marisol.lookiest.data.Usuario
 import ruiz.marisol.lookiest.ui.theme.components.CampoRegistro
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
 import java.text.SimpleDateFormat
@@ -73,6 +75,7 @@ fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit)
     var expandido by remember { mutableStateOf(false) }
     val opcionesGenero = listOf("Masculino", "Femenino", "Otro", "Prefiero no decirlo")
 
+    val context = LocalContext.current
     var mostrarCalendario by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
@@ -236,19 +239,41 @@ fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit)
         Spacer(modifier = Modifier.height(10.dp))
         Button(
             onClick = {
-                if (user.isNotEmpty() && pass.isNotEmpty() && pass == confirmarPass) {
-                    viewModel.login(user,pass)
-                    //Se guardaría en la BD?
+                val contexto = context
+
+                if (user.isBlank() || correo.isBlank() || pass.isBlank()) {
+                    Toast.makeText(context, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
+                }
+                else if (pass != confirmarPass) {
+                    Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                }
+                else {
+                    val nuevoUsuario = Usuario(
+                        email = correo,
+                        username = user,
+                        nombre = "$nombres $apellidos",
+                        contrasena = pass,
+                        genero = genero,
+                        fechaNacimiento = fechaNacimiento,
+                        biometriaActiva = false,
+                        fotoPerfil = null
+                    )
+
+                    viewModel.registrarEnRoom(nuevoUsuario)
+
+                    Toast.makeText(context, "¡Usuario registrado con éxito!", Toast.LENGTH_SHORT).show()
                     onRegistrationComplete()
                 }
             },
-            modifier = Modifier.fillMaxWidth().height(49.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(49.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(id = R.color.mustard_yellow)
             )
-        ) { Text(
-            fontSize = 17.sp,
-            text = "Registrarme") }
+        ) {
+            Text(fontSize = 17.sp, text = "Registrarme")
+        }
     }
 }
 

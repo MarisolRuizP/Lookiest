@@ -2,7 +2,9 @@ package ruiz.marisol.lookiest.ui.theme.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,8 +16,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ruiz.marisol.lookiest.R
+import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.components.CampoContra
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
 
@@ -57,85 +66,116 @@ fun CambiarContraScreen(
     var visible2 by remember { mutableStateOf(false) }
     var visible3 by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Image(painter = painterResource(id = R.drawable.lookiest_logo), contentDescription = null, modifier = Modifier.size(40.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = BlancoFondo
+    ) { paddingValues ->
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = null,
-            modifier = Modifier.size(120.dp).clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        CampoContra(
-            label = "Contraseña Anterior",
-            value = passAnterior,
-            onValueChange = { passAnterior = it },
-            isVisible = visible1,
-            onToggleVisibility = { visible1 = !visible1 },
-            onIconClick = {
-                Toast.makeText(context, "Usa tu huella para ver la contraseña", Toast.LENGTH_SHORT).show()
-            }
-        )
-
-        CampoContra(
-            label = "Contraseña Nueva",
-            value = passNueva,
-            onValueChange = { passNueva = it },
-            isVisible = visible2,
-            onToggleVisibility = { visible2 = !visible2 }
-        )
-
-        CampoContra(
-            label = "Confirmar Contraseña Nueva",
-            value = passConfirmar,
-            onValueChange = { passConfirmar = it },
-            isVisible = visible3,
-            onToggleVisibility = { visible3 = !visible3 }
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                onClick = onNavigateBack,
-                modifier = Modifier.weight(1f).height(45.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA63968)),
-                shape = RoundedCornerShape(20.dp)
-            ) { Text("Descartar") }
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.lookiest_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            }
 
-            Button(
-                onClick = {
-                    if (passAnterior != passGuardada) {
-                        Toast.makeText(context, "La contraseña anterior no coincide", Toast.LENGTH_SHORT).show()
-                    } else if (passNueva != passConfirmar) {
-                        Toast.makeText(context, "Las nuevas contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-                    } else if (passNueva.isEmpty()) {
-                        Toast.makeText(context, "Escribe una nueva contraseña", Toast.LENGTH_SHORT).show()
-                    } else {
-                        viewModel.updatePassword(passNueva)
-                        Toast.makeText(context, "¡Contraseña actualizada!", Toast.LENGTH_SHORT).show()
-                        onNavigateBack()
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Box(contentAlignment = Alignment.BottomEnd) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray),
+                    contentScale = ContentScale.Crop
+                )
+                IconButton(
+                    onClick = { /* Abrir galería */ },
+                    modifier = Modifier
+                        .background(Color.White, CircleShape)
+                        .size(30.dp)
+                ) {
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+
+                CampoContra(
+                    label = "Contraseña Anterior",
+                    value = passAnterior,
+                    onValueChange = { passAnterior = it },
+                    isVisible = visible1,
+                    onToggleVisibility = { visible1 = !visible1 },
+                    onIconClick = {
+                        Toast.makeText(context, "Usa tu huella para ver la contraseña", Toast.LENGTH_SHORT).show()
                     }
-                },
-                modifier = Modifier.weight(1f).height(45.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mustard_yellow)),
-                shape = RoundedCornerShape(20.dp)
-            ) { Text("Guardar") }
+                )
+
+
+
+                CampoContra(
+                    label = "Contraseña Nueva",
+                    value = passNueva,
+                    onValueChange = { passNueva = it },
+                    isVisible = visible2,
+                    onToggleVisibility = { visible2 = !visible2 }
+                )
+
+
+
+                CampoContra(
+                    label = "Confirmar Contraseña Nueva",
+                    value = passConfirmar,
+                    onValueChange = { passConfirmar = it },
+                    isVisible = visible3,
+                    onToggleVisibility = { visible3 = !visible3 }
+                )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.weight(1f).height(45.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA63968)),
+                    shape = RoundedCornerShape(20.dp)
+                ) { Text("Descartar") }
+
+                Button(
+                    onClick = {
+                        if (passAnterior != passGuardada) {
+                            Toast.makeText(context, "La contraseña anterior no coincide", Toast.LENGTH_SHORT).show()
+                        } else if (passNueva != passConfirmar) {
+                            Toast.makeText(context, "Las nuevas contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                        } else if (passNueva.isEmpty()) {
+                            Toast.makeText(context, "Escribe una nueva contraseña", Toast.LENGTH_SHORT).show()
+                        } else {
+                            viewModel.updatePassword(passNueva)
+                            Toast.makeText(context, "¡Contraseña actualizada!", Toast.LENGTH_SHORT).show()
+                            onNavigateBack()
+                        }
+                    },
+                    modifier = Modifier.weight(1f).height(45.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mustard_yellow)),
+                    shape = RoundedCornerShape(20.dp)
+                ) { Text("Guardar") }
+            }
         }
     }
 }

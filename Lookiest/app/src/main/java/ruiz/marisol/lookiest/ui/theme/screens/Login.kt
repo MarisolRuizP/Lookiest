@@ -202,28 +202,50 @@ fun LoginScreen(
 
         Button(
             onClick = {
-//                if (pass.isBlank()) {
-//                    Toast.makeText(context, "Por favor, escribe tu contraseña", Toast.LENGTH_SHORT).show()
-//                }
-//
-//                else if (isRegistered) {
-//                    if (pass == password) {
-//                        onLoginSuccess()
-//                    } else {
-//                        Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
-//                    }
-//                } else {
-//                    Toast.makeText(context, "No tienes cuenta. Dale a Registrarme", Toast.LENGTH_SHORT).show()
-//                }
-                onLoginSuccess() //just for now chat
+                if(isRegistered){
+                    if (pass.isBlank()) {
+                        Toast.makeText(context, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
+                    } else {
+                        viewModel.loginConRoom(userName.trim(), pass.trim()) { success ->
+                            if (success) {
+                                onLoginSuccess()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Usuario o contraseña incorrectos",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                }else{
+                    if (user.isBlank() || pass.isBlank()) {
+                        Toast.makeText(context, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
+                    } else {
+                        viewModel.loginConRoom(user.trim(), pass.trim()) { success ->
+                            if (success) {
+                                onLoginSuccess()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Usuario o contraseña incorrectos",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                }
+
             },
-            modifier = Modifier.fillMaxWidth().height(49.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(49.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(id = R.color.mustard_yellow)
             )
-        ) { Text(
-            fontSize = 17.sp,
-            text = "Ingresar") }
+        ) {
+            Text(fontSize = 17.sp, text = "Ingresar")
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -247,9 +269,3 @@ fun LoginScreen(
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun LoginScreenPreview(){
-//    LoginScreen(viewModel = AuthViewModel(DataStoreManager(LocalContext.current)))
-//}

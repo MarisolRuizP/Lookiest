@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
             this,
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return AuthViewModel(DataStoreManager(applicationContext)) as T
+                    return AuthViewModel(database.usuarioDao(),DataStoreManager(applicationContext)) as T
                 }
             }
         )[AuthViewModel::class.java]

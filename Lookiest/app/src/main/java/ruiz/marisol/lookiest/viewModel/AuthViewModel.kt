@@ -2,37 +2,62 @@ package ruiz.marisol.lookiest.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import ruiz.marisol.lookiest.data.DAO.UsuarioDao
 import ruiz.marisol.lookiest.data.DataStoreManager
+import ruiz.marisol.lookiest.data.Usuario
 
-class AuthViewModel(private val dataStore: DataStoreManager) : ViewModel() {
+class AuthViewModel(
+    private val userDao: UsuarioDao,
+    private val dataStore: DataStoreManager
+) : ViewModel() {
 
     val isLoggedIn = dataStore.isLoggedInFlow.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        false
+        viewModelScope, SharingStarted.WhileSubscribed(5000), false
     )
-
     val username = dataStore.usernameFlow.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        ""
+        viewModelScope, SharingStarted.WhileSubscribed(5000), ""
     )
-
     val password = dataStore.passwordFlow.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        ""
+        viewModelScope, SharingStarted.WhileSubscribed(5000), ""
     )
 
-    fun login(user: String, pass: String) {
+    private val _usuarioLogueado = MutableStateFlow<Usuario?>(null)
+    val usuarioLogueado: StateFlow<Usuario?> = _usuarioLogueado
+
+    // --- REGISTRO ---
+    fun registrarEnRoom(entidad: Usuario) {
         viewModelScope.launch {
-            dataStore.saveSession(user, pass)
+            userDao.registrarUsuario(entidad)
+            dataStore.saveSession(entidad.username, entidad.contrasena)
         }
     }
 
+    fun cargarDatosUsuario(userName: String) {
+        viewModelScope.launch {
+            _usuarioLogueado.value = userDao.getUserByUsername(userName)
+        }
+    }
+
+    // --- LOGIN ---
+    fun loginConRoom(identificador: String, pass: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val usuario = userDao.getUserByIdentifier(identificador)
+
+            if (usuario != null && usuario.contrasena == pass) {
+                dataStore.saveSession(usuario.username, usuario.contrasena)
+                onResult(true)
+            } else {
+                onResult(false)
+            }
+        }
+    }
+
+    // --- CIERRE DE SESIÓN ---
     fun logout() {
         viewModelScope.launch {
             dataStore.logout()
@@ -41,14 +66,23 @@ class AuthViewModel(private val dataStore: DataStoreManager) : ViewModel() {
 
     fun updateProfile(nuevoUsuario: String, nuevoNombre: String, nuevoCorreo: String) {
         viewModelScope.launch {
-            // Suponiendo que tu DataStoreManager tiene una función para editar estos campos
-            //dataStore.updateUserData(nuevoUsuario, nuevoNombre, nuevoCorreo)
+            userDao.updateUserProfile(nuevoCorreo, nuevoNombre, nuevoUsuario)
+            dataStore.saveSession(nuevoUsuario, password.value)
         }
     }
 
     fun updatePassword(nuevaPass: String) {
         viewModelScope.launch {
-            dataStore.saveSession(username.value, nuevaPass)
+            val currentUsername = username.value
+            userDao.updatePasswordByUsername(currentUsername, nuevaPass)
+            dataStore.saveSession(currentUsername, nuevaPass)
+        }
+    }
+
+    fun actualizarFotoPerfil(email: String, nuevaUri: String) {
+        viewModelScope.launch {
+            userDao.updateFotoPerfil(email, nuevaUri)
+            cargarDatosUsuario(username.value)
         }
     }
 }

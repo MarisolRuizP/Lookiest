@@ -8,9 +8,10 @@ import androidx.room.TypeConverters
 import ruiz.marisol.lookiest.data.DAO.OutfitDao
 import ruiz.marisol.lookiest.data.DAO.PrendaDao
 import ruiz.marisol.lookiest.data.DAO.UsoOutfitDao
+import ruiz.marisol.lookiest.data.DAO.UsuarioDao
 
 @Database(
-    entities = [PrendaRopa::class, Outfit::class, UsoOutfit::class],
+    entities = [PrendaRopa::class, Outfit::class, UsoOutfit::class, Usuario::class],
     version = 2,
     exportSchema = false
 )
@@ -20,6 +21,7 @@ abstract class LookiestDatabase : RoomDatabase() {
     abstract fun prendaDao(): PrendaDao
     abstract fun outfitDao(): OutfitDao
     abstract fun usoOutfitDao(): UsoOutfitDao
+    abstract fun usuarioDao(): UsuarioDao
 
     companion object {
         @Volatile

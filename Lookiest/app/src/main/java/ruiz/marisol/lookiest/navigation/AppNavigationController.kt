@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -225,6 +226,7 @@ fun AppNavigation(
             PerfilScreen(
                 viewModel             = authViewModel,
                 onNavigateToEdit      = { navController.navigate(Screen.EditarPerfil.route) },
+                navController = navController,
                 onNavigateToChangePass = { navController.navigate(Screen.CambiarContra.route) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) { popUpTo(0) }

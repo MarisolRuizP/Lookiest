@@ -34,6 +34,7 @@ fun LookiestBottomBar(
                         0 -> navController.navigate(Screen.MisOutfits.route)
                         2 -> navController.navigate(Screen.MiCloset.route)
                         3 -> navController.navigate(Screen.Calendario.route)
+                        4 -> navController.navigate(Screen.Perfil.route)
                         // 1, 4 → agregar cuando tengas esas pantallas
                     }
                 },
