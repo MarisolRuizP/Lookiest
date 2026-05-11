@@ -30,18 +30,15 @@ fun LookiestTextField(
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
-
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
-
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
-                cursorColor = Color.Black
+                cursorColor = MaterialTheme.colorScheme.onSurface
             ),
-
             textStyle = TextStyle(
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp

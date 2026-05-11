@@ -46,11 +46,11 @@ fun OutfitDeHoyScreen(
     Scaffold(
         topBar    = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(selected = 1, navController = navController) },
-        containerColor = BlancoFondo,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    viewModel.guardarUsoDiario()   // guarda en el calendario
+                    viewModel.guardarUsoDiario()    // guarda en el calendario
                     viewModel.resetUsadasHoy()     // limpia los toggles
                     onVolver()
                 },
@@ -74,19 +74,19 @@ fun OutfitDeHoyScreen(
                 placeholder = {
                     Text(
                         "Buscar...",
-                        color      = Azul,
+                        color      = MaterialTheme.colorScheme.primary,
                         fontStyle  = FontStyle.Italic,
                         fontFamily = FontFamily.Monospace
                     )
                 },
                 trailingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = null, tint = Color.DarkGray)
+                    Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(20.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor   = Color.White,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor   = MaterialTheme.colorScheme.surface,
                     unfocusedBorderColor    = Color.Transparent
                 ),
                 modifier = Modifier
@@ -109,7 +109,7 @@ fun OutfitDeHoyScreen(
                 ) {
                     Text(
                         "Tu clóset está vacío.\n¡Agrega prendas primero!",
-                        color    = Color.Gray,
+                        color    = MaterialTheme.colorScheme.onSurface,
                         fontSize = 14.sp
                     )
                 }

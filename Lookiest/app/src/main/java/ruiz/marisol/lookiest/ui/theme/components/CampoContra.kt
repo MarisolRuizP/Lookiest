@@ -45,12 +45,11 @@ fun CampoContra(
             color = MaterialTheme.colorScheme.onSurface
         )
 
-
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             shadowElevation = 4.dp,
-            color = Color.White
+            color = MaterialTheme.colorScheme.surface
         ) {
             TextField(
                 value = value,
@@ -65,7 +64,7 @@ fun CampoContra(
                         Icon(
                             imageVector = if (isVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = null,
-                            tint = Color.Gray
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },

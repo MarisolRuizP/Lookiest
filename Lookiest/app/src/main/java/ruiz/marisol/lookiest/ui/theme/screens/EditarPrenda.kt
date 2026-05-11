@@ -66,7 +66,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.ui.theme.Amarillo
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.components.ChipSeleccionable
 import ruiz.marisol.lookiest.ui.theme.components.ConfirmacionDialog
@@ -149,7 +148,7 @@ fun EditarPrendaScreen(
                     tempImageUri = uri
                     cameraLauncher.launch(uri)
                 }) {
-                    Text("Cámara", color = Rosa)
+                    Text("Cámara", color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
@@ -159,7 +158,7 @@ fun EditarPrendaScreen(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                     )
                 }) {
-                    Text("Galería", color = Rosa)
+                    Text("Galería", color = MaterialTheme.colorScheme.primary)
                 }
             }
         )
@@ -194,7 +193,7 @@ fun EditarPrendaScreen(
         topBar  = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(
             selected = 2, navController) },
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -213,7 +212,7 @@ fun EditarPrendaScreen(
             // foto d la prenda
             Card(
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
@@ -227,20 +226,20 @@ fun EditarPrendaScreen(
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xFFF0EEF0)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Checkroom,
-                            contentDescription = null,
-                            modifier = Modifier.size(72.dp),
-                            tint = Color.LightGray
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.background),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Checkroom,
+                                contentDescription = null,
+                                modifier = Modifier.size(72.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
-                }
                     IconButton(
                         onClick  = { /* abrir galería/cámara */ },
                         modifier = Modifier.align(Alignment.BottomEnd)
@@ -248,7 +247,7 @@ fun EditarPrendaScreen(
                         Icon(
                             Icons.Default.CameraAlt,
                             contentDescription = "Cambiar foto",
-                            tint = Color.DarkGray
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -286,12 +285,12 @@ fun EditarPrendaScreen(
                             shape = RoundedCornerShape(50),
                             modifier = Modifier.fillMaxWidth().menuAnchor(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = Color(0xFFF5F5F7),
-                                unfocusedContainerColor = Color(0xFFF5F5F7),
-                                focusedBorderColor = Color(0xFFD1D1D6),
-                                unfocusedBorderColor = Color(0xFFD1D1D6),
-                                focusedTextColor = Color(0xFFA73266),
-                                unfocusedTextColor = Color(0xFFA73266)
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedTextColor = MaterialTheme.colorScheme.primary,
+                                unfocusedTextColor = MaterialTheme.colorScheme.primary
                             )
                         )
                         ExposedDropdownMenu(
@@ -324,7 +323,7 @@ fun EditarPrendaScreen(
                                 .height(56.dp)
                                 .menuAnchor(),
                             shape = RoundedCornerShape(50),
-                            color = BlancoFondo,
+                            color = MaterialTheme.colorScheme.surface,
                             onClick = { expandedColor = true }
                         ) {
                             Row(
@@ -345,7 +344,7 @@ fun EditarPrendaScreen(
                                 Icon(
                                     imageVector = Icons.Default.Add,
                                     contentDescription = "Cambiar color",
-                                    tint = Color.DarkGray
+                                    tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
@@ -391,7 +390,7 @@ fun EditarPrendaScreen(
                         onClick = { estampado = true },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Rosa,
-                            unselectedColor = Color.Gray
+                            unselectedColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                     Text("Sí", fontSize = 14.sp)
@@ -404,7 +403,7 @@ fun EditarPrendaScreen(
                         onClick = { estampado = false },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Rosa,
-                            unselectedColor = Color.Gray
+                            unselectedColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                     Text("No", fontSize = 14.sp)
@@ -488,6 +487,3 @@ fun EditarPrendaScreen(
         }
     }
 }
-
-
-

@@ -34,9 +34,6 @@ import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
 import ruiz.marisol.lookiest.ui.theme.Azul50
-import ruiz.marisol.lookiest.ui.theme.Blanco
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
-import ruiz.marisol.lookiest.ui.theme.Negro
 import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
@@ -89,7 +86,7 @@ fun DetalleOutfitScreen(
                     colors  = ButtonDefaults.buttonColors(containerColor = Amarillo)
                 ) { Text("Cancelar") }
             },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(16.dp)
         )
     }
@@ -98,7 +95,7 @@ fun DetalleOutfitScreen(
         topBar = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(
             selected = 0, navController) },
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -125,7 +122,7 @@ fun DetalleOutfitScreen(
                                 Icon(
                                     imageVector = Icons.Default.ChevronLeft,
                                     contentDescription = "Volver",
-                                    tint = Color.DarkGray,
+                                    tint = MaterialTheme.colorScheme.onBackground,
                                     modifier = Modifier.size(28.dp)
                                 )
                             }
@@ -142,7 +139,7 @@ fun DetalleOutfitScreen(
                             Text(
                                 text = "Creado por ",
                                 fontSize = 13.sp,
-                                color = Negro,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 fontFamily = FontFamily.Monospace
                             )
                             Text(
@@ -177,7 +174,7 @@ fun DetalleOutfitScreen(
                         Text(
                             text = "$likes",
                             fontSize = 11.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -203,7 +200,7 @@ fun DetalleOutfitScreen(
                         Text(
                             text = "$favCount",
                             fontSize = 11.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -259,7 +256,7 @@ fun DetalleOutfitScreen(
 fun PrendaDetalleRow(prenda: PrendaRopa) {
     Card(
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Blanco),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -274,7 +271,7 @@ fun PrendaDetalleRow(prenda: PrendaRopa) {
                 modifier = Modifier
                     .size(80.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(BlancoFondo),
+                    .background(MaterialTheme.colorScheme.background),
                 contentAlignment = Alignment.Center
             ) {
 
@@ -289,7 +286,7 @@ fun PrendaDetalleRow(prenda: PrendaRopa) {
                     Icon(
                         imageVector = Icons.Default.Checkroom,
                         contentDescription = null,
-                        tint = Color.LightGray,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(44.dp)
                     )
                 }
@@ -302,7 +299,7 @@ fun PrendaDetalleRow(prenda: PrendaRopa) {
                 text = prenda.nombre,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
-                color = Negro
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }
@@ -313,13 +310,13 @@ fun EtiquetaChip(texto: String) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(Azul50)
+            .background(MaterialTheme.colorScheme.primary)
             .padding(horizontal = 14.dp, vertical = 5.dp)
     ) {
         Text(
             text = texto,
             fontSize  = 12.sp,
-            color = Negro,
+            color = MaterialTheme.colorScheme.onPrimary,
             fontWeight = FontWeight.Medium
         )
     }

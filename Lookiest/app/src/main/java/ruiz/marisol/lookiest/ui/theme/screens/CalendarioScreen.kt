@@ -26,9 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.ui.theme.Amarillo
-import ruiz.marisol.lookiest.ui.theme.Azul
 import ruiz.marisol.lookiest.ui.theme.Azul50
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
@@ -60,7 +58,7 @@ fun CalendarioScreen(
     Scaffold(
         topBar = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(selected = 3, navController = navController) },
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) {padding ->
         LazyColumn(
             modifier = Modifier
@@ -82,7 +80,7 @@ fun CalendarioScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -97,7 +95,7 @@ fun CalendarioScreen(
                                 Icon(
                                     Icons.Default.ChevronLeft,
                                     contentDescription = "Mes anterior",
-                                    tint = Azul
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                             val nombreMesCal = mesActual.month
@@ -108,13 +106,13 @@ fun CalendarioScreen(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace,
-                                color = Azul
+                                color = MaterialTheme.colorScheme.primary
                             )
                             IconButton(onClick = { mesActual = mesActual.plusMonths(1) }) {
                                 Icon(
                                     Icons.Default.ChevronRight,
                                     contentDescription = "Mes siguiente",
-                                    tint = Azul
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -182,8 +180,8 @@ fun CalendarioScreen(
                                                     fontFamily = FontFamily.Monospace,
                                                     color = when {
                                                         esSeleccionado -> Color.White
-                                                        esHoy -> Azul
-                                                        else -> Color.Black
+                                                        esHoy -> MaterialTheme.colorScheme.primary
+                                                        else -> MaterialTheme.colorScheme.onBackground
                                                     },
                                                     fontWeight = if (esHoy || esSeleccionado) FontWeight.Bold else FontWeight.Normal
                                                 )
@@ -231,7 +229,7 @@ fun CalendarioScreen(
                     ) {
                         Text(
                             text = "No hay prendas registradas para este día",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 14.sp,
                             fontFamily = FontFamily.Monospace,
                             textAlign = TextAlign.Center
@@ -242,7 +240,7 @@ fun CalendarioScreen(
                 items(prendasDelDia) { prenda ->
                     Card(
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(0.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -254,7 +252,7 @@ fun CalendarioScreen(
                                 modifier = Modifier
                                     .size(64.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF5F5F7)),
+                                    .background(MaterialTheme.colorScheme.background),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (!prenda.imagen.isNullOrEmpty()) {
@@ -270,7 +268,7 @@ fun CalendarioScreen(
                                     Icon(
                                         imageVector = Icons.Default.Checkroom,
                                         contentDescription = null,
-                                        tint = Color.LightGray,
+                                        tint = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.size(32.dp)
                                     )
                                 }
@@ -288,14 +286,14 @@ fun CalendarioScreen(
                                 Spacer(Modifier.height(4.dp))
                                 Box(
                                     modifier = Modifier
-                                        .background(Azul50, RoundedCornerShape(20.dp))
+                                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
                                         .padding(horizontal = 8.dp, vertical = 2.dp)
                                 ) {
                                     Text(
                                         text = prenda.categoria,
                                         fontSize = 11.sp,
                                         fontFamily = FontFamily.Monospace,
-                                        color = Color.DarkGray
+                                        color = MaterialTheme.colorScheme.onPrimary
                                     )
                                 }
                             }

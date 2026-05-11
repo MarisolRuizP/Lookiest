@@ -28,9 +28,6 @@ import androidx.navigation.compose.rememberNavController
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
-import ruiz.marisol.lookiest.ui.theme.Azul
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
-import ruiz.marisol.lookiest.ui.theme.LookiestTheme
 import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
@@ -93,7 +90,7 @@ fun ClosetScreen(
                 )
             }
         },
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -110,19 +107,19 @@ fun ClosetScreen(
                 placeholder = {
                     Text(
                         "Buscar...",
-                        color = Azul,
+                        color = MaterialTheme.colorScheme.primary,
                         fontStyle = FontStyle.Italic,
                         fontFamily = FontFamily.Monospace
                     )
                 },
                 trailingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.DarkGray)
+                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurface)
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(20.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedBorderColor = Color.Transparent,
                 ),
                 modifier = Modifier
@@ -169,7 +166,7 @@ fun ClosetScreen(
                                             text = opcion.label,
                                             fontFamily = FontFamily.Monospace,
                                             fontWeight = if (opcion == ordenActual) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (opcion == ordenActual) Rosa else Color.DarkGray
+                                            color = if (opcion == ordenActual) Rosa else MaterialTheme.colorScheme.onSurface
                                         )
                                     },
                                     onClick = {
@@ -193,7 +190,7 @@ fun ClosetScreen(
                     Text(
                         text = if (busqueda.isNotBlank()) "Sin resultados para \"$busqueda\""
                         else "Tu clóset está vacío.\n¡Agrega tu primera prenda!",
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
                     )
@@ -218,4 +215,3 @@ fun ClosetScreen(
         }
     }
 }
-

@@ -59,17 +59,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.PrendaRopa
-import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
-import ruiz.marisol.lookiest.ui.theme.LookiestTheme
 import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.components.ChipSeleccionable
 import ruiz.marisol.lookiest.ui.theme.components.ConfirmacionDialog
@@ -114,16 +110,15 @@ fun AgregarPrendaScreen(
 
     val context = LocalContext.current
 
-    // estados
     var nombre by remember { mutableStateOf("") }
     var tienda by remember { mutableStateOf("") }
     var talla by remember { mutableStateOf("") }
     var color by remember { mutableStateOf("") }
-    var estampado by remember { mutableStateOf(false) } // Cambiado a Boolean
+    var estampado by remember { mutableStateOf(false) }
     var categoria by remember { mutableStateOf("") }
-    var tagsSeleccionadas by remember { mutableStateOf(emptySet<String>()) } // Cambiado a Set
-    var temporadasSeleccionadas by remember { mutableStateOf(emptySet<String>()) } // Cambiado a Set
-    var formalidad by remember { mutableStateOf("") } // Sintaxis corregida
+    var tagsSeleccionadas by remember { mutableStateOf(emptySet<String>()) }
+    var temporadasSeleccionadas by remember { mutableStateOf(emptySet<String>()) }
+    var formalidad by remember { mutableStateOf("") }
 
     var expandedColor by remember { mutableStateOf(false) }
     var expandedTalla by remember { mutableStateOf(false) }
@@ -140,22 +135,16 @@ fun AgregarPrendaScreen(
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     var mostrarMenuFoto by remember { mutableStateOf(false) }
 
-    // Lanzador para la galeria
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
-        if (uri != null) {
-            imageUri = uri
-        }
+        if (uri != null) imageUri = uri
     }
 
-    // Lanzador para la camara
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
-        if (success) {
-            imageUri = tempImageUri
-        }
+        if (success) imageUri = tempImageUri
     }
 
     if (mostrarMenuFoto) {
@@ -166,7 +155,6 @@ fun AgregarPrendaScreen(
             confirmButton = {
                 TextButton(onClick = {
                     mostrarMenuFoto = false
-                    // Preparamos la URI temporal y lanzamos la cámara
                     val file = context.createImageFile()
                     val uri = FileProvider.getUriForFile(
                         context,
@@ -176,24 +164,22 @@ fun AgregarPrendaScreen(
                     tempImageUri = uri
                     cameraLauncher.launch(uri)
                 }) {
-                    Text("Cámara", color = Rosa)
+                    Text("Cámara", color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = {
                     mostrarMenuFoto = false
-                    // Lanzamos el Photo Picker de la galería
                     galleryLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                     )
                 }) {
-                    Text("Galería", color = Rosa)
+                    Text("Galería", color = MaterialTheme.colorScheme.primary)
                 }
             }
         )
     }
 
-    // dialogo de confirmacion
     if (mostrarDialogoGuardar) {
         ConfirmacionDialog(
             mensaje = "¿Deseas guardar la nueva prenda?",
@@ -201,9 +187,8 @@ fun AgregarPrendaScreen(
             onConfirmar = {
                 val rutaImagen = imageUri?.let { context.copiarImagenAInternos(it) }
                 mostrarDialogoGuardar = false
-                // armar dto
                 val nuevaPrenda = PrendaRopa(
-                    id = 0, // la bd sobreescribe el id
+                    id = 0,
                     nombre = nombre,
                     tienda = tienda,
                     talla = talla,
@@ -216,17 +201,16 @@ fun AgregarPrendaScreen(
                     imagen = rutaImagen,
                     favorito = false
                 )
-
                 viewModel.agregarPrenda(nuevaPrenda)
                 onGuardado()
             }
         )
     }
+
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(
-            selected = 2, navController) },
-        containerColor = BlancoFondo
+        bottomBar = { LookiestBottomBar(selected = 2, navController) },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -241,10 +225,13 @@ fun AgregarPrendaScreen(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
-            // contenedor de la foto
+
+            // Contenedor de la foto
             Card(
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
@@ -261,14 +248,14 @@ fun AgregarPrendaScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color(0xFFF0EEF0)),
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Checkroom,
                                 contentDescription = null,
                                 modifier = Modifier.size(72.dp),
-                                tint = Color.LightGray
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -278,12 +265,15 @@ fun AgregarPrendaScreen(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(8.dp)
-                            .background(Color.White.copy(alpha = 0.7f), CircleShape)
-                    ){
+                            .background(
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                CircleShape
+                            )
+                    ) {
                         Icon(
                             Icons.Default.CameraAlt,
                             contentDescription = "Agregar foto",
-                            tint = Color.DarkGray
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -291,7 +281,6 @@ fun AgregarPrendaScreen(
 
             Spacer(Modifier.height(14.dp))
 
-            // info de la prenda
             LookiestTextField("Nombre de la Prenda", nombre) { nombre = it }
             Spacer(Modifier.height(10.dp))
             LookiestTextField("Tienda/Marca", tienda) { tienda = it }
@@ -321,12 +310,12 @@ fun AgregarPrendaScreen(
                                 .fillMaxWidth()
                                 .menuAnchor(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = Color(0xFFF5F5F7),
-                                unfocusedContainerColor = Color(0xFFF5F5F7),
-                                focusedBorderColor = Color(0xFFD1D1D6),
-                                unfocusedBorderColor = Color(0xFFD1D1D6),
-                                focusedTextColor = Color(0xFFA73266),
-                                unfocusedTextColor = Color(0xFFA73266)
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                focusedTextColor = MaterialTheme.colorScheme.primary,
+                                unfocusedTextColor = MaterialTheme.colorScheme.primary
                             )
                         )
                         ExposedDropdownMenu(
@@ -358,9 +347,9 @@ fun AgregarPrendaScreen(
                                 .height(56.dp)
                                 .menuAnchor(),
                             shape = RoundedCornerShape(50),
-                            color = BlancoFondo,
+                            color = MaterialTheme.colorScheme.surface,
                             onClick = { expandedColor = true },
-                            border = BorderStroke(1.dp, Color(0xFFD1D1D6))
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp),
@@ -372,16 +361,13 @@ fun AgregarPrendaScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .background(
-                                            color = colorVisual,
-                                            shape = CircleShape
-                                        )
+                                        .background(color = colorVisual, shape = CircleShape)
                                 )
 
                                 Icon(
                                     imageVector = Icons.Default.Add,
                                     contentDescription = "Agregar color",
-                                    tint = Color.DarkGray
+                                    tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
@@ -394,9 +380,11 @@ fun AgregarPrendaScreen(
                                 DropdownMenuItem(
                                     text = {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Box(modifier = Modifier
-                                                .size(16.dp)
-                                                .background(valorC, CircleShape))
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .background(valorC, CircleShape)
+                                            )
                                             Spacer(Modifier.width(8.dp))
                                             Text(nombreC)
                                         }
@@ -427,7 +415,7 @@ fun AgregarPrendaScreen(
                         onClick = { estampado = true },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Rosa,
-                            unselectedColor = Color.Gray
+                            unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
                     Text("Sí", fontSize = 14.sp)
@@ -439,7 +427,7 @@ fun AgregarPrendaScreen(
                         onClick = { estampado = false },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Rosa,
-                            unselectedColor = Color.Gray
+                            unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
                     Text("No", fontSize = 14.sp)
@@ -464,23 +452,13 @@ fun AgregarPrendaScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // Tags extra
             SelectorMultiple("Tags Extra", tags, tagsSeleccionadas) { op ->
-                tagsSeleccionadas = if (op in tagsSeleccionadas) {
-                    tagsSeleccionadas - op
-                } else {
-                    tagsSeleccionadas + op
-                }
+                tagsSeleccionadas = if (op in tagsSeleccionadas) tagsSeleccionadas - op else tagsSeleccionadas + op
             }
             Spacer(Modifier.height(12.dp))
 
-            // Temporada
             SelectorMultiple("Temporada", temporadas, temporadasSeleccionadas) { op ->
-                temporadasSeleccionadas = if (op in temporadasSeleccionadas) {
-                    temporadasSeleccionadas - op
-                } else {
-                    temporadasSeleccionadas + op
-                }
+                temporadasSeleccionadas = if (op in temporadasSeleccionadas) temporadasSeleccionadas - op else temporadasSeleccionadas + op
             }
             Spacer(Modifier.height(12.dp))
 
@@ -505,7 +483,6 @@ fun AgregarPrendaScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // descartar
                 Button(
                     onClick = onDescartado,
                     colors = ButtonDefaults.buttonColors(containerColor = Rosa),
@@ -513,7 +490,6 @@ fun AgregarPrendaScreen(
                     modifier = Modifier.weight(1f)
                 ) { Text("Descartar") }
 
-                // guardar
                 Button(
                     onClick = { mostrarDialogoGuardar = true },
                     colors = ButtonDefaults.buttonColors(containerColor = Amarillo),
@@ -526,4 +502,3 @@ fun AgregarPrendaScreen(
         }
     }
 }
-

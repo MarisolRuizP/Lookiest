@@ -27,12 +27,6 @@ import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.navigation.Screen
 import ruiz.marisol.lookiest.ui.theme.Amarillo
-import ruiz.marisol.lookiest.ui.theme.Azul
-import ruiz.marisol.lookiest.ui.theme.Azul50
-import ruiz.marisol.lookiest.ui.theme.Blanco
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
-import ruiz.marisol.lookiest.ui.theme.LookiestTheme
-import ruiz.marisol.lookiest.ui.theme.Negro
 import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.components.ConfirmacionDialog
 import ruiz.marisol.lookiest.ui.theme.components.EstadisticaRow
@@ -67,16 +61,14 @@ fun DetallesPrendaScreen(
 
     Scaffold(
         topBar = { LookiestTopBar() },
-        bottomBar = { LookiestBottomBar(
-            selected = 2, navController) },
-        containerColor = BlancoFondo
+        bottomBar = { LookiestBottomBar(selected = 2, navController) },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(top = 70.dp)
+                .padding(padding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -86,20 +78,17 @@ fun DetallesPrendaScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal=20.dp, vertical = 10.dp)
+                    .padding(horizontal = 20.dp, vertical = 10.dp)
             )
-
 
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp),
-
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    // Usamos AsyncImage para leer el String (URI) de la base de datos
                     if (!prenda.imagen.isNullOrEmpty()) {
                         AsyncImage(
                             model = prenda.imagen,
@@ -113,7 +102,7 @@ fun DetallesPrendaScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color(0xFFF5F5F7))
+                                .background(MaterialTheme.colorScheme.background)
                                 .padding(10.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -121,7 +110,7 @@ fun DetallesPrendaScreen(
                                 imageVector = Icons.Default.Checkroom,
                                 contentDescription = null,
                                 modifier = Modifier.size(60.dp),
-                                tint = Color.LightGray
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -142,7 +131,6 @@ fun DetallesPrendaScreen(
             }
             Spacer(Modifier.height(12.dp))
 
-
             Text(
                 text = prenda.nombre,
                 fontWeight = FontWeight.ExtraBold,
@@ -156,19 +144,18 @@ fun DetallesPrendaScreen(
                     text = prenda.tienda,
                     fontSize = 12.sp,
                     fontStyle = FontStyle.Italic,
-                    color = Negro
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
             Spacer(Modifier.height(5.dp))
 
-
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                InfoChip(texto = prenda.talla, bgColor = Blanco, textColor = Rosa)
+                InfoChip(texto = prenda.talla, bgColor = MaterialTheme.colorScheme.surface, textColor = Rosa)
                 InfoChip(
                     texto = if (prenda.estampado) "Estampado" else "Sin Estampado",
-                    bgColor = Blanco,
-                    textColor = Azul
+                    bgColor = MaterialTheme.colorScheme.surface,
+                    textColor = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -183,7 +170,7 @@ fun DetallesPrendaScreen(
                     text = "Color",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Negro
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(Modifier.width(12.dp))
@@ -192,13 +179,12 @@ fun DetallesPrendaScreen(
                     modifier = Modifier
                         .size(30.dp)
                         .background(
-                            color = parseColor(prenda.color), // Función para convertir el String a Color
+                            color = parseColor(prenda.color),   // Función para convertir el String a Color
                             shape = androidx.compose.foundation.shape.CircleShape
                         )
                 )
             }
             Spacer(Modifier.height(10.dp))
-
 
             Row(
                 modifier = Modifier
@@ -206,21 +192,19 @@ fun DetallesPrendaScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                InfoChip(prenda.categoria, Azul50, Negro)
-                prenda.temporada.forEach { t -> InfoChip(t, Azul50, Negro) }
-                InfoChip(prenda.formalidad, Azul50, Negro)
-                prenda.tags.forEach { tag -> InfoChip(tag, Azul50, Negro) }
+                InfoChip(prenda.categoria, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
+                prenda.temporada.forEach { t -> InfoChip(t, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary) }
+                InfoChip(prenda.formalidad, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
+                prenda.tags.forEach { tag -> InfoChip(tag, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary) }
             }
 
             Spacer(Modifier.height(30.dp))
 
-       
             EstadisticaRow(label = "Total de usos", valor = 15)
             Spacer(Modifier.height(6.dp))
             EstadisticaRow(label = "Promedio mensual", valor = 3)
 
             Spacer(Modifier.height(30.dp))
-
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -245,7 +229,6 @@ fun DetallesPrendaScreen(
                 }
             }
 
-
             Spacer(Modifier.height(20.dp))
         }
     }
@@ -260,7 +243,6 @@ fun parseColor(colorName: String): Color {
         "amarillo" -> Color(0xFFD8973C)
         "rosa" -> Color(0xFFA73266)
         "blanco" -> Color.White
-        else -> Color.Gray // Color por defecto si no lo encuentra
+        else -> Color.Gray  // Color por defecto si no lo encuentra
     }
 }
-

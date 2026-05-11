@@ -60,7 +60,7 @@ fun DetallesOutfitScreen(
     Scaffold(
         topBar    = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(selected = 1, navController = navController) },
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -100,11 +100,11 @@ fun DetallesOutfitScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 InfoChip(
                     texto   = if (outfit.esPublico) "Público" else "Privado",
-                    bgColor = Azul50,
-                    textColor = Negro
+                    bgColor = MaterialTheme.colorScheme.primary,
+                    textColor = MaterialTheme.colorScheme.onPrimary
                 )
                 etiquetasLista.forEach { tag ->
-                    InfoChip(texto = tag.trim(), bgColor = Azul50, textColor = Negro)
+                    InfoChip(texto = tag.trim(), bgColor = MaterialTheme.colorScheme.primary, textColor = MaterialTheme.colorScheme.onPrimary)
                 }
             }
 
@@ -119,7 +119,7 @@ fun DetallesOutfitScreen(
                     modifier         = Modifier.fillMaxWidth().height(80.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Sin prendas asignadas", color = Color.Gray, fontSize = 14.sp)
+                    Text("Sin prendas asignadas", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                 }
             } else {
                 prendasDelOutfit.forEach { prenda ->
@@ -159,7 +159,7 @@ fun DetallesOutfitScreen(
 fun PrendaOutfitRow(prenda: PrendaRopa) {
     Card(
         shape    = RoundedCornerShape(14.dp),
-        colors   = CardDefaults.cardColors(containerColor = Color.White),
+        colors   = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -169,7 +169,7 @@ fun PrendaOutfitRow(prenda: PrendaRopa) {
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .background(Color(0xFFF5F5F7), RoundedCornerShape(10.dp)),
+                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 if (!prenda.imagen.isNullOrEmpty()) {
@@ -183,7 +183,7 @@ fun PrendaOutfitRow(prenda: PrendaRopa) {
                     Icon(
                         Icons.Default.Checkroom,
                         contentDescription = null,
-                        tint     = Color.LightGray,
+                        tint     = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -191,34 +191,8 @@ fun PrendaOutfitRow(prenda: PrendaRopa) {
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(prenda.nombre,    fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                Text(prenda.categoria, fontSize = 12.sp, color = Color.Gray)
+                Text(prenda.categoria, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
-}
-
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewDetallesOutfit() {
-//    val prendasMock = listOf(
-//        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara",     talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
-//        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",          talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
-//    )
-//    val outfitMock = Outfit(
-//        id        = 1,
-//        nombre    = "Look Rojo Otoñal",
-//        prendas   = prendasMock,
-//        esPublico = false,
-//        etiquetas = listOf("Casual", "Otoño", "Rojo", "Inspo", "2026"),
-//        creadoPor = "Mi (Marisol_Ruiz)",
-//        totalUsos = 3
-//    )
-//    LookiestTheme {
-//        DetallesOutfitScreen(
-//            outfit   = outfitMock,
-//            onEditar = {}
-//        )
-//    }
 }

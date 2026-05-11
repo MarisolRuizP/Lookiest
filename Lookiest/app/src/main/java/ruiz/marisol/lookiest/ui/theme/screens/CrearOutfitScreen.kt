@@ -60,7 +60,7 @@ fun CrearOutfitScreen(
         topBar = { LookiestTopBar() },
         bottomBar = { LookiestBottomBar(
             selected = 0, navController) },
-        containerColor = BlancoFondo,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
@@ -111,9 +111,9 @@ fun CrearOutfitScreen(
                 modifier      = Modifier.fillMaxWidth(),
                 singleLine    = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor   = Color.White,
-                    unfocusedBorderColor    = Color(0xFFD1D1D6),
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor   = MaterialTheme.colorScheme.surface,
+                    unfocusedBorderColor    = MaterialTheme.colorScheme.outline,
                     focusedBorderColor      = Rosa
                 )
             )
@@ -188,7 +188,7 @@ fun CrearOutfitScreen(
                     shape         = RoundedCornerShape(50),
                     singleLine    = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color(0xFFD1D1D6),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                         focusedBorderColor   = Rosa
                     )
                 )
@@ -210,7 +210,7 @@ fun CrearOutfitScreen(
                                     modifier = Modifier.size(14.dp)
                                 )
                             },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = Azul50)
+                            colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.primary)
                         )
                     }
                 }
@@ -231,7 +231,7 @@ fun PrendaSeleccionableCard(
 ) {
     Card(
         shape  = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -244,7 +244,7 @@ fun PrendaSeleccionableCard(
                         .fillMaxWidth()
                         .height(100.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFF5F5F7)),
+                        .background(MaterialTheme.colorScheme.background),
                     contentAlignment = Alignment.Center
                 ) {
                     if (!prenda.imagen.isNullOrEmpty()) {
@@ -258,14 +258,14 @@ fun PrendaSeleccionableCard(
                         Icon(
                             Icons.Default.Checkroom,
                             contentDescription = null,
-                            tint     = Color.LightGray,
+                            tint     = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(40.dp)
                         )
                     }
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(prenda.nombre,    fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1)
-                Text(prenda.categoria, fontSize = 10.sp, color = Color.Gray)
+                Text(prenda.categoria, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurface)
             }
 
             if (seleccionada) {
@@ -287,16 +287,3 @@ fun PrendaSeleccionableCard(
         }
     }
 }
-
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//private fun PreviewCrearOutfit() {
-//    LookiestTheme {
-//        CrearOutfitScreen(
-//            viewModel     = androidx.lifecycle.viewmodel.compose.viewModel(),
-//            onGuardar     = {},
-//            onDescartar   = {},
-//            navController = androidx.navigation.compose.rememberNavController()
-//        )
-//    }
-//}

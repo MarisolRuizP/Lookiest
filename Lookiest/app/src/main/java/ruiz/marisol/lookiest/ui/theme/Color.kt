@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 val Blanco = Color(0xFFFFFFFF)
 val BlancoFondo = Color(0xFFEDEDF4)
 val Azul = Color(0xFF0C6291)
-val Azul50 = Color(0xFF2196F3)
+val Azul50 = Color(0xFF4F97BF)
 val Negro = Color(0xFF000004)
 val Amarillo = Color(0xFFD8973C)
 val Amarillo50 = Color(0xFFFFA012)

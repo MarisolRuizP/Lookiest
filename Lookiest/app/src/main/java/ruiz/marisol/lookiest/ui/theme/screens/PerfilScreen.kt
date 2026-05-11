@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.R
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.components.CardOption
 import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
@@ -112,7 +111,7 @@ fun PerfilScreen(
                 )
                 Surface(
                     shape = CircleShape,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier
                         .size(35.dp)
                         .clickable {
@@ -124,7 +123,7 @@ fun PerfilScreen(
                         imageVector = Icons.Default.PhotoCamera,
                         contentDescription = "Cambiar foto",
                         modifier = Modifier.padding(6.dp),
-                        tint = Color.Black
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }

@@ -29,10 +29,7 @@ import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.ui.theme.Amarillo
-import ruiz.marisol.lookiest.ui.theme.Blanco
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.Rosa
-import ruiz.marisol.lookiest.ui.theme.Rosa50
 import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
@@ -72,14 +69,14 @@ fun OutfitsScreen(
             FloatingActionButton(
                 onClick = onNuevoOutfit,
                 containerColor = Rosa,
-                contentColor = Blanco,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape,
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Nuevo outfit", modifier = Modifier.size(22.dp))
             }
         },
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -92,18 +89,17 @@ fun OutfitsScreen(
                 value = busqueda,
                 onValueChange = { busqueda = it },
                 placeholder   = {
-                    Text("Buscar...", color = Color(0xFF6A9ECC), fontStyle = FontStyle.Italic)
+                    Text("Buscar...", color = MaterialTheme.colorScheme.primary, fontStyle = FontStyle.Italic)
                 },
                 trailingIcon  = {
-                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.DarkGray)
+                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurface)
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(20.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedBorderColor = Color.Transparent,
-
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -167,7 +163,7 @@ fun OutfitRow(
 
     Card(
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Blanco),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -195,13 +191,13 @@ fun OutfitRow(
                             modifier = Modifier
                                 .size(58.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFF0EEF0)),
+                                .background(MaterialTheme.colorScheme.background),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Checkroom,
                                 contentDescription = null,
-                                tint = Color.LightGray,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                                 modifier = Modifier.size(28.dp)
                             )
                         }
@@ -212,7 +208,7 @@ fun OutfitRow(
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "Ver outfit",
-                tint = Color.Gray,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -236,7 +232,7 @@ fun PrendaMiniatura(prenda: PrendaRopa) {
             Icon(
                 imageVector = Icons.Default.Checkroom,
                 contentDescription = prenda.nombre,
-                tint = Color.LightGray,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                 modifier = Modifier.size(38.dp)
             )
         }
@@ -252,7 +248,7 @@ fun OutfitTab(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(if (seleccionado) Amarillo else Color.White)
+            .background(if (seleccionado) Amarillo else MaterialTheme.colorScheme.surface)
             .clickable { onClick() }
             .padding(horizontal = 18.dp, vertical = 7.dp)
     ) {
@@ -260,7 +256,7 @@ fun OutfitTab(
             text = texto,
             fontSize = 14.sp,
             fontWeight = if (seleccionado) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (seleccionado) Color.White else Color.DarkGray
+            color = if (seleccionado) Color.White else MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -276,17 +272,16 @@ private fun EstadoVacio(mensaje: String) {
                 Icons.Default.Checkroom,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
-                tint = Color.LightGray
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 text = mensaje,
                 fontSize  = 14.sp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)
             )
         }
     }
 }
-

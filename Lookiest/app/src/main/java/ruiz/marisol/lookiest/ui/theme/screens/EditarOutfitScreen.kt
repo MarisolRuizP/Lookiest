@@ -79,7 +79,7 @@ fun EditarOutfitScreen(
     Scaffold(
         topBar    = { LookiestTopBar() },
 //        bottomBar = { LookiestBottomBar(selected = 1, navController = navController) },
-        containerColor = BlancoFondo
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -170,7 +170,7 @@ fun EditarOutfitScreen(
                     shape         = RoundedCornerShape(50),
                     singleLine    = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color(0xFFD1D1D6),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                         focusedBorderColor   = Rosa
                     )
                 )
@@ -192,7 +192,7 @@ fun EditarOutfitScreen(
                                     modifier = Modifier.size(14.dp)
                                 )
                             },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = Azul50)
+                            colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.primary)
                         )
                     }
                 }
@@ -223,30 +223,4 @@ fun EditarOutfitScreen(
             Spacer(Modifier.height(8.dp))
         }
     }
-}
-
-// ── Preview ───────────────────────────────────────────────────────────────
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun PreviewEditarOutfit() {
-//    val prendasMock = listOf(
-//        PrendaRopa(id = 1, nombre = "Chaqueta roja de vinipiel", tienda = "Zara", talla = "M",  color = "Rojo", estampado = false, categoria = "OuterWear", formalidad = "Casual", imagen = R.drawable.chaqueta_roja),
-//        PrendaRopa(id = 2, nombre = "Falda roja con patoles",    tienda = "",     talla = "XS", color = "Rojo", estampado = true,  categoria = "Bottom",    formalidad = "Casual", imagen = R.drawable.falda_roja)
-//    )
-//    val outfitMock = Outfit(
-//        id        = 1,
-//        nombre    = "Look Rojo Otoñal",
-//        prendas   = prendasMock,
-//        esPublico = false,
-//        etiquetas = listOf("Casual", "Otoño", "Rojo"),
-//        creadoPor = "Mi (Marisol_Ruiz)"
-//    )
-//    LookiestTheme {
-//        EditarOutfitScreen(
-//            outfitInicial = outfitMock,
-//            onGuardado    = {},
-//            onDescartado  = {}
-//        )
-//    }
 }

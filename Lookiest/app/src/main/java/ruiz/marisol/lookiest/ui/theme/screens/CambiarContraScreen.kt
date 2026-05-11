@@ -6,7 +6,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,14 +41,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.R
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
 import ruiz.marisol.lookiest.ui.theme.components.BiometricHelper
 import ruiz.marisol.lookiest.ui.theme.components.CampoContra
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
@@ -100,8 +96,6 @@ fun CambiarContraScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                val esOscuro = isSystemInDarkTheme()
-
                 Image(
                     painter = painterResource(id = R.drawable.lookiest_logo),
                     contentDescription = null,
@@ -109,7 +103,7 @@ fun CambiarContraScreen(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold,color = MaterialTheme.colorScheme.onBackground)
+                Text(text = "Lookiest", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -121,7 +115,7 @@ fun CambiarContraScreen(
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape)
-                        .background(Color.LightGray),
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
                     contentScale = ContentScale.Crop,
                     error = painterResource(id = R.drawable.ic_launcher_foreground),
                     placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
@@ -131,7 +125,7 @@ fun CambiarContraScreen(
                         launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                     },
                     modifier = Modifier
-                        .background(Color.White, CircleShape)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape)
                         .size(30.dp)
                 ) {
                     Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onTertiaryContainer)
@@ -158,21 +152,21 @@ fun CambiarContraScreen(
                 )
             }
 
-                CampoContra(
-                    label = "Contraseña Nueva",
-                    value = passNueva,
-                    onValueChange = { passNueva = it },
-                    isVisible = visible2,
-                    onToggleVisibility = { visible2 = !visible2 }
-                )
+            CampoContra(
+                label = "Contraseña Nueva",
+                value = passNueva,
+                onValueChange = { passNueva = it },
+                isVisible = visible2,
+                onToggleVisibility = { visible2 = !visible2 }
+            )
 
-                CampoContra(
-                    label = "Confirmar Contraseña Nueva",
-                    value = passConfirmar,
-                    onValueChange = { passConfirmar = it },
-                    isVisible = visible3,
-                    onToggleVisibility = { visible3 = !visible3 }
-                )
+            CampoContra(
+                label = "Confirmar Contraseña Nueva",
+                value = passConfirmar,
+                onValueChange = { passConfirmar = it },
+                isVisible = visible3,
+                onToggleVisibility = { visible3 = !visible3 }
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 

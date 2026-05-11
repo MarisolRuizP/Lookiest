@@ -34,11 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.ui.theme.Amarillo
-import ruiz.marisol.lookiest.ui.theme.Azul
-import ruiz.marisol.lookiest.ui.theme.Azul50
-import ruiz.marisol.lookiest.ui.theme.Blanco
-import ruiz.marisol.lookiest.ui.theme.BlancoFondo
-import ruiz.marisol.lookiest.ui.theme.Negro
 
 @Composable
 fun PrendaCard(
@@ -48,7 +43,7 @@ fun PrendaCard(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BlancoFondo),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onMoreClick() }
@@ -61,7 +56,7 @@ fun PrendaCard(
                     .fillMaxWidth()
                     .height(160.dp)
                     .clip(RoundedCornerShape(15.dp))
-                    .background(Blanco)
+                    .background(MaterialTheme.colorScheme.surface)
 
             ) {
                 if (!prenda.imagen.isNullOrEmpty()) {
@@ -77,7 +72,7 @@ fun PrendaCard(
                     Icon(
                         imageVector = Icons.Default.Checkroom,
                         contentDescription = null,
-                        tint = Color.LightGray,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                         modifier = Modifier
                             .size(64.dp)
                             .align(Alignment.Center)
@@ -122,7 +117,7 @@ fun PrendaCard(
                     Icon(
                         imageVector  = Icons.Filled.MoreHoriz,
                         contentDescription = "Más opciones",
-                        tint = Negro,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -135,7 +130,7 @@ fun PrendaCard(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .background(
-                        color = Azul50,
+                        color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(20.dp)
                     )
                     .padding(horizontal = 8.dp, vertical = 2.dp)
@@ -143,7 +138,7 @@ fun PrendaCard(
                 Text(
                     text = prenda.categoria,
                     fontSize = 11.sp,
-                    color = Negro,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Medium
                 )
             }

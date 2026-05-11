@@ -3,7 +3,6 @@ package ruiz.marisol.lookiest.ui.theme.screens
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -71,7 +69,6 @@ fun LoginScreen(
     var pass by remember { mutableStateOf("") }
     var passVisible by remember { mutableStateOf(false) }
     val biometricHelper = remember { BiometricHelper(context) }
-    val esOscuro = isSystemInDarkTheme()
 
     LaunchedEffect(userName) {
         if (userName.isNotEmpty()) {
@@ -89,7 +86,7 @@ fun LoginScreen(
                 .padding(paddingValues)
                 .padding(36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
@@ -151,14 +148,13 @@ fun LoginScreen(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 30.sp,
                 textAlign = TextAlign.Center,
-                color = if (isRegistered) Color(0xFFA63968) else MaterialTheme.colorScheme.onSurface
+                color = if (isRegistered) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(60.dp))
 
             if (!isRegistered) {
                 Text(
-                    modifier = Modifier
-                        .align(Alignment.Start),
+                    modifier = Modifier.align(Alignment.Start),
                     fontSize = 16.sp,
                     fontFamily = FontFamily.Monospace,
                     text = "Usuario"
@@ -184,8 +180,7 @@ fun LoginScreen(
             }
 
             Text(
-                modifier = Modifier
-                    .align(Alignment.Start),
+                modifier = Modifier.align(Alignment.Start),
                 fontSize = 16.sp,
                 fontFamily = FontFamily.Monospace,
                 text = "Contraseña"
@@ -207,8 +202,7 @@ fun LoginScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     IconButton(onClick = { passVisible = !passVisible }) {
-                        val icono =
-                            if (passVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val icono = if (passVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                         Icon(imageVector = icono, contentDescription = "Visibilidad de contraseña")
                     }
                 }
@@ -250,46 +244,29 @@ fun LoginScreen(
                 onClick = {
                     if (isRegistered) {
                         if (pass.isBlank()) {
-                            Toast.makeText(
-                                context,
-                                "Por favor, llena todos los campos",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
                         } else {
                             viewModel.loginConRoom(userName.trim(), pass.trim()) { success ->
                                 if (success) {
                                     onLoginSuccess()
                                 } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Contraseña incorrecta",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
                     } else {
                         if (user.isBlank() || pass.isBlank()) {
-                            Toast.makeText(
-                                context,
-                                "Por favor, llena todos los campos",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show()
                         } else {
                             viewModel.loginConRoom(user.trim(), pass.trim()) { success ->
                                 if (success) {
                                     onLoginSuccess()
                                 } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Usuario o contraseña incorrectos",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
                     }
-
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -322,10 +299,25 @@ fun LoginScreen(
                         .height(49.dp)
                         .padding(vertical = 4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(id = R.color.azul)
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Text(fontSize = 17.sp, text = "Usar huella")
+                }
+            }
+
+            if (isRegistered) {
+                Button(
+                    onClick = { viewModel.logout() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(49.dp)
+                        .padding(vertical = 4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Text(fontSize = 17.sp, text = "Ingresar con otra cuenta")
                 }
             }
 
@@ -337,7 +329,7 @@ fun LoginScreen(
                         .height(49.dp)
                         .padding(vertical = 4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(id = R.color.azul)
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Text(fontSize = 17.sp, text = "Registrarme")

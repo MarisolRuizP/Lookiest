@@ -9,12 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ruiz.marisol.lookiest.ui.theme.Blanco
-import ruiz.marisol.lookiest.ui.theme.Negro
 import ruiz.marisol.lookiest.ui.theme.Rosa50
 
 @Composable
@@ -24,7 +21,7 @@ fun EstadisticaRow(label: String, valor: Int) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, fontSize = 13.sp, color = Negro, fontWeight = FontWeight.Bold)
+        Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
@@ -33,7 +30,7 @@ fun EstadisticaRow(label: String, valor: Int) {
                 .padding(horizontal = 10.dp, vertical = 6.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("$valor", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Blanco)
+            Text("$valor", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }

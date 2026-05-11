@@ -190,8 +190,8 @@ fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit)
                                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                                 focusedBorderColor = Color.Transparent,
                                 unfocusedBorderColor = Color.Transparent,
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             ),
                             shape = RoundedCornerShape(16.dp)
                         )
@@ -261,7 +261,7 @@ fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit)
                             ExposedDropdownMenu(
                                 expanded = expandido,
                                 onDismissRequest = { expandido = false },
-                                modifier = Modifier.background(Color.White)
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                             ) {
                                 opcionesGenero.forEach { opcion ->
                                     DropdownMenuItem(
@@ -348,4 +348,3 @@ fun RegistroScreen(viewModel: AuthViewModel, onRegistrationComplete: () -> Unit)
         }
     }
 }
-

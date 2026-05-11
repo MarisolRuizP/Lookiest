@@ -14,17 +14,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ruiz.marisol.lookiest.ui.theme.Azul
-import ruiz.marisol.lookiest.ui.theme.Azul50
-import ruiz.marisol.lookiest.ui.theme.Negro
-import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.Rosa50
+import ruiz.marisol.lookiest.ui.theme.Azul50
 
 @Composable
 fun InfoChip(texto: String, bgColor: Color, textColor: Color) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50)) // Stadium shape total
+            .clip(RoundedCornerShape(50))   // Stadium shape total
             .background(bgColor)
             .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
@@ -50,7 +47,7 @@ fun ChipSeleccionable(
         Text(
             text = texto,
             fontSize = 13.sp,
-            color = Negro,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium
         )
     }
@@ -69,7 +66,7 @@ fun SelectorMultiple(
             text = titulo,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -84,9 +81,9 @@ fun SelectorMultiple(
 
                 Surface(
                     onClick = { onToggle(op) },
-                    shape = RoundedCornerShape(50), // Stadium shape
+                    shape = RoundedCornerShape(50), // Stadium shape total
                     color = if (esSeleccionado) Rosa50 else Azul50,
-                    contentColor = Negro
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
                     Text(
                         text = op,
