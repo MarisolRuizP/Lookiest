@@ -4,9 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "prendas")
-data class PrendaRopa (
-    @PrimaryKey(true)
+data class PrendaRopa(
+    @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val userEmail: String = "",
     val nombre: String,
     val tienda: String = "",
     val talla: String,

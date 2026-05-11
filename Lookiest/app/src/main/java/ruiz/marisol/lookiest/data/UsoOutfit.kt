@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class UsoOutfit(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val userEmail: String = "",
     val oufitId: Int,
-    val fecha: String //formato YYYY/MM/DD
+    val fecha: String
 )

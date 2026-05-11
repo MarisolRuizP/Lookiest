@@ -1,12 +1,7 @@
 package ruiz.marisol.lookiest.viewModel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -17,10 +12,13 @@ import ruiz.marisol.lookiest.data.DAO.UsoOutfitDao
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.data.UsoOutfit
+import androidx.compose.ui.graphics.Color
+
 class ClosetViewModel(
     private val prendaDAO: PrendaDao,
     private val outfitDAO: OutfitDao,
-    private val usoDAO: UsoOutfitDao
+    private val usoDAO: UsoOutfitDao,
+    private val userEmail: String
 ) : ViewModel() {
 
     private val _tallas      = listOf("XS", "S", "M", "L", "XL", "XXL")
@@ -48,42 +46,32 @@ class ClosetViewModel(
     val formalidades get() = _formalidades
     val colores      get() = _opcionesColores
 
-    // ── Flows de Room ──────────────────────────────────────────────────────
     val prendas: StateFlow<List<PrendaRopa>> = prendaDAO
-        .obtenerTodasLasPrendas()
+        .obtenerTodasLasPrendas(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val outfits: StateFlow<List<Outfit>> = outfitDAO
-        .obtenerTodosLosOutfits()
+        .obtenerTodosLosOutfits(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Flow de prendas marcadas como "usadas hoy" (necesita el DAO actualizado)
     val prendasUsadasHoy: StateFlow<List<PrendaRopa>> = prendaDAO
-        .obtenerUsadasHoy()
+        .obtenerUsadasHoy(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Flow del outfit marcado como "outfit de hoy"
     val outfitDeHoy: StateFlow<Outfit?> = outfitDAO
-        .obtenerOutfitDeHoy()
+        .obtenerOutfitDeHoy(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-
     val usos: StateFlow<List<UsoOutfit>> = usoDAO
-        .obtenerTodos()
+        .obtenerTodos(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-
-
 
     fun eliminarUso(uso: UsoOutfit) = viewModelScope.launch {
         usoDAO.eliminar(uso)
     }
 
-
-
-
     fun agregarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
-        prendaDAO.insertarPrenda(prenda)
+        prendaDAO.insertarPrenda(prenda.copy(userEmail = userEmail))
     }
 
     fun eliminarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
@@ -98,19 +86,16 @@ class ClosetViewModel(
         prendaDAO.actualizarPrenda(prenda.copy(favorito = !prenda.favorito))
     }
 
-    /** Marca o desmarca una prenda como usada hoy */
     fun toggleUsadaHoy(id: Int, usada: Boolean) = viewModelScope.launch {
         prendaDAO.setUsadaHoy(id, usada)
     }
 
-    /** Desmarca todas las prendas como "usadas hoy" (para resetear al día siguiente) */
     fun resetUsadasHoy() = viewModelScope.launch {
         prendaDAO.resetUsadasHoy()
     }
 
-
     fun agregarOutfit(outfit: Outfit) = viewModelScope.launch {
-        outfitDAO.insertarOutfit(outfit)
+        outfitDAO.insertarOutfit(outfit.copy(userEmail = userEmail))
     }
 
     fun eliminarOutfit(outfit: Outfit) = viewModelScope.launch {
@@ -120,32 +105,27 @@ class ClosetViewModel(
     fun actualizarOutfit(outfitActualizado: Outfit) = viewModelScope.launch {
         outfitDAO.actualizarOutfit(outfitActualizado)
     }
+
     fun setOutfitDeHoy(outfitId: Int) = viewModelScope.launch {
-        outfitDAO.resetOutfitDeHoy()
+        outfitDAO.resetOutfitDeHoy(userEmail)
         outfitDAO.setOutfitDeHoy(outfitId)
         outfitDAO.incrementarUsos(outfitId)
         usoDAO.insertar(
             UsoOutfit(
-                oufitId = outfitId,
-                fecha   = java.time.LocalDate.now().toString()
+                userEmail = userEmail,
+                oufitId   = outfitId,
+                fecha     = java.time.LocalDate.now().toString()
             )
         )
     }
 
     fun guardarUsoDiario() = viewModelScope.launch {
-        val hoy  = java.time.LocalDate.now().toString()
-        val ids  = prendasUsadasHoy.value.map { it.id }
+        val hoy = java.time.LocalDate.now().toString()
+        val ids = prendasUsadasHoy.value.map { it.id }
         if (ids.isEmpty()) return@launch
-
-        usoDAO.eliminarPorFecha(hoy)
-
+        usoDAO.eliminarPorFecha(userEmail, hoy)
         ids.forEach { prendaId ->
-            usoDAO.insertar(
-                UsoOutfit(
-                    oufitId = prendaId,
-                    fecha   = hoy
-                )
-            )
+            usoDAO.insertar(UsoOutfit(userEmail = userEmail, oufitId = prendaId, fecha = hoy))
         }
     }
 
@@ -155,6 +135,4 @@ class ClosetViewModel(
             .map { it.oufitId }
         return prendas.value.filter { it.id in prendaIds }
     }
-
-
 }

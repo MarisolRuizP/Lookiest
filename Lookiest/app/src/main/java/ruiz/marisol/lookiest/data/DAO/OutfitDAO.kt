@@ -11,14 +11,14 @@ import ruiz.marisol.lookiest.data.Outfit
 
 @Dao
 interface OutfitDao {
-    @Query("SELECT * FROM outfits ORDER BY id DESC")
-    fun obtenerTodosLosOutfits(): Flow<List<Outfit>>
+    @Query("SELECT * FROM outfits WHERE userEmail = :email ORDER BY id DESC")
+    fun obtenerTodosLosOutfits(email: String): Flow<List<Outfit>>
 
     @Query("SELECT * FROM outfits WHERE id = :id")
     suspend fun obtenerOutfitPorId(id: Int): Outfit?
 
-    @Query("SELECT * FROM outfits WHERE esOutfitDeHoy = 1 LIMIT 1")
-    fun obtenerOutfitDeHoy(): Flow<Outfit?>
+    @Query("SELECT * FROM outfits WHERE userEmail = :email AND esOutfitDeHoy = 1 LIMIT 1")
+    fun obtenerOutfitDeHoy(email: String): Flow<Outfit?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarOutfit(outfit: Outfit)
@@ -29,8 +29,8 @@ interface OutfitDao {
     @Delete
     suspend fun eliminarOutfit(outfit: Outfit)
 
-    @Query("UPDATE outfits SET esOutfitDeHoy = 0")
-    suspend fun resetOutfitDeHoy()
+    @Query("UPDATE outfits SET esOutfitDeHoy = 0 WHERE userEmail = :email")
+    suspend fun resetOutfitDeHoy(email: String)
 
     @Query("UPDATE outfits SET esOutfitDeHoy = 1 WHERE id = :id")
     suspend fun setOutfitDeHoy(id: Int)
