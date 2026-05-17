@@ -61,21 +61,17 @@ fun PerfilScreen(
     onNavigateToChangePass: () -> Unit,
     onLogout: () -> Unit
 ) {
-    val userNameSession by viewModel.username.collectAsState()
-    val usuarioData by viewModel.usuarioLogueado.collectAsState()
+    // Cambiado: Ya no necesitamos cargarDatosUsuario, FirebaseUser tiene todo
+    val currentUser by viewModel.currentUser.collectAsState()
+    val biometriaActiva by viewModel.biometriaHabilitada.collectAsState()
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
     val context = LocalContext.current
-
-    LaunchedEffect(userNameSession) {
-        if (userNameSession.isNotEmpty()) {
-            viewModel.cargarDatosUsuario(userNameSession)
-        }
-    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            viewModel.actualizarFotoPerfil(usuarioData?.email ?: "", it.toString())
+            Toast.makeText(context, "La subida de fotos se implementará pronto", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -98,8 +94,7 @@ fun PerfilScreen(
 
             Box(contentAlignment = Alignment.BottomEnd) {
                 AsyncImage(
-                    model = usuarioData?.fotoPerfil,
-
+                    model = currentUser?.photoUrl,
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(120.dp)
@@ -131,17 +126,12 @@ fun PerfilScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = usuarioData?.nombre ?: "Cargando...",
+                text = currentUser?.displayName?.takeIf { it.isNotBlank() } ?: "Usuario",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
             Text(
-                text = "@${usuarioData?.username ?: userNameSession}",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp
-            )
-            Text(
-                text = usuarioData?.email ?: "",
+                text = currentUser?.email ?: "Cargando...",
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp
             )
@@ -161,23 +151,19 @@ fun PerfilScreen(
 
             CardOption(
                 title = "Biometría",
-                subtitle = if (usuarioData?.biometriaActiva == true) "Desactivar" else "Activar",
+                subtitle = if (biometriaActiva) "Desactivar" else "Activar",
                 onClick = {
-                    val usernameActual = usuarioData?.username ?: ""
-                    val estadoActual = usuarioData?.biometriaActiva ?: false
-                    viewModel.actualizarBiometria(usernameActual, !estadoActual)
-                    val mensaje = if (!estadoActual) "Biometría activada" else "Biometría desactivada"
-                    Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                    // Nota: Tu ViewModel actual solo tiene el dummy 'biometriaHabilitada', no tiene una función para mutarlo.
+                    Toast.makeText(context, "Función en construcción para Firebase", Toast.LENGTH_SHORT).show()
                 }
             )
             Spacer(modifier = Modifier.height(10.dp))
             CardOption(
                 title = "Cambiar Tema",
-                subtitle = if (usuarioData?.isDarkMode == true) "Tema Oscuro" else "Tema Claro",
+                subtitle = if (isDarkMode) "Tema Oscuro" else "Tema Claro",
                 onClick = {
-                    val username = usuarioData?.username ?: ""
-                    val modoActual = usuarioData?.isDarkMode ?: false
-                    viewModel.actualizarTheme(username, modoActual)
+                    // Nota: Tu ViewModel actual no tiene una función para cambiar el isDarkMode.
+                    Toast.makeText(context, "Función en construcción para Firebase", Toast.LENGTH_SHORT).show()
                 }
             )
 
@@ -196,7 +182,6 @@ fun PerfilScreen(
 
             Button(
                 onClick = {
-                    Toast.makeText(context, "Usa tu huella para cerrar sesión", Toast.LENGTH_LONG).show()
                     viewModel.logout()
                     onLogout()
                 },

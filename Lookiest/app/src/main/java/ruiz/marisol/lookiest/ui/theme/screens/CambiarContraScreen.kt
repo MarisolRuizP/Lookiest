@@ -58,28 +58,29 @@ fun CambiarContraScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHome: () -> Unit
 ) {
-    // Obtenemos la contraseña actual guardada para validar
     val passGuardada by viewModel.password.collectAsState()
     val context = LocalContext.current
 
-    // Estados para los campos
     var passAnterior by remember(passGuardada) { mutableStateOf(passGuardada) }
     var passNueva by remember { mutableStateOf("") }
     var passConfirmar by remember { mutableStateOf("") }
 
-    // Estados de visibilidad
     var visible1 by remember { mutableStateOf(false) }
     var visible2 by remember { mutableStateOf(false) }
     var visible3 by remember { mutableStateOf(false) }
 
-    val usuarioData by viewModel.usuarioLogueado.collectAsState()
+    // Cambiado: Ahora escuchamos a currentUser de Firebase
+    val currentUser by viewModel.currentUser.collectAsState()
+    val biometriaActiva by viewModel.biometriaHabilitada.collectAsState()
+
     val biometricHelper = remember { BiometricHelper(context) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            viewModel.actualizarFotoPerfil(usuarioData?.email ?: "", it.toString())
+            // Nota: Tu AuthViewModel actual no tiene función para subir fotos a Firebase Storage.
+            Toast.makeText(context, "Sube la foto desde Editar Perfil", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,7 +111,8 @@ fun CambiarContraScreen(
 
             Box(contentAlignment = Alignment.BottomEnd) {
                 AsyncImage(
-                    model = usuarioData?.fotoPerfil,
+                    // Cambiado: Leemos photoUrl de FirebaseUser
+                    model = currentUser?.photoUrl,
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(120.dp)
@@ -140,7 +142,7 @@ fun CambiarContraScreen(
                     onValueChange = { passAnterior = it },
                     isVisible = visible1,
                     onToggleVisibility = {
-                        if (usuarioData?.biometriaActiva == true) {
+                        if (biometriaActiva) {
                             biometricHelper.lanzarBiometria(
                                 onSuccess = { visible1 = !visible1 },
                                 onError = { Toast.makeText(context, "Error: $it", Toast.LENGTH_SHORT).show() }
@@ -176,7 +178,9 @@ fun CambiarContraScreen(
             ) {
                 Button(
                     onClick = onNavigateBack,
-                    modifier = Modifier.weight(1f).height(45.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(45.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA63968)),
                     shape = RoundedCornerShape(20.dp)
                 ) { Text("Descartar") }
@@ -192,16 +196,20 @@ fun CambiarContraScreen(
                         } else if (passNueva.isEmpty()) {
                             Toast.makeText(context, "Escribe una nueva contraseña", Toast.LENGTH_SHORT).show()
                         } else {
-                            viewModel.updatePassword(passNueva)
-                            Toast.makeText(context, "¡Contraseña actualizada!", Toast.LENGTH_SHORT).show()
-                            if(esOlvido){
-                                onNavigateToHome()
-                            }else{
-                                onNavigateBack()
+                            // Cambiado: Usamos el callback de tu nueva función de ViewModel
+                            viewModel.updatePassword(passNueva) { exito ->
+                                if (exito) {
+                                    Toast.makeText(context, "¡Contraseña actualizada!", Toast.LENGTH_SHORT).show()
+                                    if(esOlvido) onNavigateToHome() else onNavigateBack()
+                                } else {
+                                    Toast.makeText(context, "Error al actualizar contraseña", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     },
-                    modifier = Modifier.weight(1f).height(45.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(45.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                     shape = RoundedCornerShape(20.dp)
                 ) { Text("Guardar") }

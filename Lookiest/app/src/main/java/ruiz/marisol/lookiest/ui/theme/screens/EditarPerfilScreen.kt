@@ -1,5 +1,6 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -61,35 +63,21 @@ fun EditarPerfilScreen(
     viewModel: AuthViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val currentUserName by viewModel.username.collectAsState()
+    // Cambiado: Ahora escuchamos a currentUser de Firebase
+    val currentUser by viewModel.currentUser.collectAsState()
+    val context = LocalContext.current
 
-    var user by remember { mutableStateOf(currentUserName) }
-    var nombre by remember { mutableStateOf("") }
-    var correo by remember { mutableStateOf("") }
+    var nombre by remember(currentUser) { mutableStateOf(currentUser?.displayName ?: "") }
+    var correo by remember(currentUser) { mutableStateOf(currentUser?.email ?: "") }
 
     var mostrarDialogo by remember { mutableStateOf(false) }
-    val currentUserNameSession by viewModel.username.collectAsState()
-    val usuarioData by viewModel.usuarioLogueado.collectAsState()
-
-    LaunchedEffect(usuarioData) {
-        usuarioData?.let {
-            user = it.username
-            nombre = it.nombre
-            correo = it.email
-        }
-    }
-
-    LaunchedEffect(currentUserNameSession) {
-        if (currentUserNameSession.isNotEmpty()) {
-            viewModel.cargarDatosUsuario(currentUserNameSession)
-        }
-    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            viewModel.actualizarFotoPerfil(usuarioData?.email ?: "", it.toString())
+            // Nota: Tu AuthViewModel no tiene función para actualizar fotos de Firebase todavía
+            Toast.makeText(context, "La subida de fotos se implementará pronto", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -123,8 +111,7 @@ fun EditarPerfilScreen(
 
             Box(contentAlignment = Alignment.BottomEnd) {
                 AsyncImage(
-                    model = usuarioData?.fotoPerfil,
-
+                    model = currentUser?.photoUrl,
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(120.dp)
@@ -148,7 +135,7 @@ fun EditarPerfilScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            CampoEditar(label = "Usuario", value = user, onValueChange = { user = it })
+            // En Firebase, el "usuario" es el correo. Lo quitamos o lo dejamos de solo lectura.
             CampoEditar(label = "Nombre", value = nombre, onValueChange = { nombre = it })
             CampoEditar(label = "Correo Electrónico", value = correo, onValueChange = { correo = it })
 
@@ -189,9 +176,16 @@ fun EditarPerfilScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.updateProfile(user, nombre, correo)
+                        // Cambiado: Ahora usa tu función updateProfile que configuraste para Firebase
+                        viewModel.updateProfile(nombre, correo) { exito ->
+                            if (exito) {
+                                Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
+                                onNavigateBack()
+                            } else {
+                                Toast.makeText(context, "Error al actualizar", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                         mostrarDialogo = false
-                        onNavigateBack()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                 ) { Text("Confirmar") }

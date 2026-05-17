@@ -2,157 +2,170 @@ package ruiz.marisol.lookiest.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ruiz.marisol.lookiest.data.DAO.UsuarioDao
-import ruiz.marisol.lookiest.data.DataStoreManager
-import ruiz.marisol.lookiest.data.Usuario
+import kotlinx.coroutines.tasks.await
 
-class AuthViewModel(
-    private val userDao: UsuarioDao,
-    private val dataStore: DataStoreManager
-) : ViewModel() {
+class AuthViewModel : ViewModel() {
 
-    private val _usuarioLogueado = MutableStateFlow<Usuario?>(null)
-    private val _biometriaHabilitada = MutableStateFlow(false)
-    private val _isDarkMode = MutableStateFlow(false)
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
+    // Usuario actual
+    private val _currentUser = MutableStateFlow<FirebaseUser?>(auth.currentUser)
+    val currentUser: StateFlow<FirebaseUser?> = _currentUser.asStateFlow()
 
-    init {
+    val isLoggedIn: Boolean get() = auth.currentUser != null
+
+    val username: StateFlow<String>
+        get() = MutableStateFlow(auth.currentUser?.email ?: "")
+
+    // Estados de UI
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    // Registro
+
+    /**
+     * Registra un nuevo usuario con correo y contraseña en Firebase.
+     */
+    fun registrar(
+        email: String,
+        password: String,
+        displayName: String = "",
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {}
+    ) {
+        if (email.isBlank() || password.isBlank()) {
+            _errorMessage.value = "Todos los campos deben estar llenos"
+            onError("Todos los campos deben estar llenos")
+            return
+        }
         viewModelScope.launch {
-            dataStore.usernameFlow.collect { name ->
-                if (!name.isNullOrEmpty()) {
-                    val user = userDao.getUserByUsername(name)
-                    _usuarioLogueado.value = user
-                    _biometriaHabilitada.value = user?.biometriaActiva ?: false
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                // Crea el usuario en Firebase
+                val resultado = auth.createUserWithEmailAndPassword(email, password).await()
+
+                // Guarda el nombre de usuario en el perfil de Firebase
+                if (displayName.isNotBlank()) {
+                    val profileUpdates = userProfileChangeRequest {
+                        this.displayName = displayName
+                    }
+                    resultado.user?.updateProfile(profileUpdates)?.await()
                 }
+
+                _currentUser.value = auth.currentUser
+                onSuccess()
+            } catch (e: Exception) {
+                val msg = mensajeDeError(e)
+                _errorMessage.value = msg
+                onError(msg)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
-    val usuarioLogueado: StateFlow<Usuario?> = _usuarioLogueado
-    val isLoggedIn = dataStore.isLoggedInFlow.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), false
-    )
-    val username = dataStore.usernameFlow.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), ""
-    )
-    val password = dataStore.passwordFlow.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), ""
-    )
-    val biometriaHabilitada: StateFlow<Boolean> = _biometriaHabilitada
-    val isDarkMode: StateFlow<Boolean> = _isDarkMode
 
-    fun registrarEnRoom(entidad: Usuario) {
-        viewModelScope.launch {
-            userDao.registrarUsuario(entidad)
-            dataStore.saveSession(entidad.username, entidad.contrasena)
+
+    /**
+     * Inicia sesión con correo y contraseña en Firebase.
+     */
+    fun login(
+        email: String,
+        password: String,
+        onResult: (Boolean) -> Unit = {}
+    ) {
+        if (email.isBlank() || password.isBlank()) {
+            _errorMessage.value = "Ingresa tu correo y contraseña"
+            onResult(false)
+            return
         }
-    }
-
-    fun cargarDatosUsuario(userName: String) {
         viewModelScope.launch {
-            _usuarioLogueado.value = userDao.getUserByUsername(userName)
-        }
-    }
-
-    fun loginConRoom(identificador: String, pass: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val usuario = userDao.getUserByIdentifier(identificador)
-
-            if (usuario != null && usuario.contrasena == pass) {
-                dataStore.saveSession(usuario.username, usuario.contrasena)
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                auth.signInWithEmailAndPassword(email, password).await()
+                _currentUser.value = auth.currentUser
                 onResult(true)
-            } else {
+            } catch (e: Exception) {
+                _errorMessage.value = "Usuario y/o contraseña incorrectos"
                 onResult(false)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     fun logout() {
-        viewModelScope.launch {
-            dataStore.logout()
-        }
+        auth.signOut()
+        _currentUser.value = null
+        _errorMessage.value = null
     }
 
-    fun updateProfile(nuevoUsuario: String, nuevoNombre: String, nuevoCorreo: String) {
+
+    fun updateProfile(nuevoNombre: String, nuevoCorreo: String, onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
-            userDao.updateUserProfile(nuevoCorreo, nuevoNombre, nuevoUsuario)
-            dataStore.saveSession(nuevoUsuario, password.value)
-        }
-    }
-
-    fun updatePassword(nuevaPass: String) {
-        viewModelScope.launch {
-            val currentUsername = usuarioLogueado.value?.username ?: username.value
-
-            if (currentUsername.isNotEmpty()) {
-                userDao.updatePasswordByUsername(currentUsername, nuevaPass)
-                dataStore.saveSession(currentUsername, nuevaPass)
-                val usuarioActualizado = userDao.getUserByUsername(currentUsername)
-                _usuarioLogueado.value = usuarioActualizado
-            }
-        }
-    }
-
-    fun actualizarFotoPerfil(email: String, nuevaUri: String) {
-        viewModelScope.launch {
-            userDao.updateFotoPerfil(email, nuevaUri)
-            cargarDatosUsuario(username.value)
-        }
-    }
-
-    fun verificarBiometria(userName: String) {
-        viewModelScope.launch {
-            val usuario = userDao.getUserByUsername(userName)
-            _biometriaHabilitada.value = usuario?.biometriaActiva ?: false
-        }
-    }
-
-    fun actualizarBiometria(username: String, nuevoEstado: Boolean) {
-        viewModelScope.launch {
-            userDao.updateBiometria(username, nuevoEstado)
-            val usuarioActualizado = userDao.getUserByUsername(username)
-            _usuarioLogueado.value = usuarioActualizado
-            _biometriaHabilitada.value = nuevoEstado
-        }
-    }
-
-    fun loginConBiometria(onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val identificador = username.value
-            if (identificador.isNotEmpty()) {
-                val usuario = userDao.getUserByUsername(identificador)
-                if (usuario != null) {
-                    dataStore.saveSession(usuario.username, usuario.contrasena)
-                    _usuarioLogueado.value = usuario
-
-                    onResult(true)
-                } else {
-                    onResult(false)
+            _isLoading.value = true
+            try {
+                val profileUpdates = userProfileChangeRequest {
+                    displayName = nuevoNombre
                 }
-            } else {
+                auth.currentUser?.updateProfile(profileUpdates)?.await()
+
+                if (nuevoCorreo != auth.currentUser?.email) {
+                    auth.currentUser?.verifyBeforeUpdateEmail(nuevoCorreo)?.await()
+                }
+                _currentUser.value = auth.currentUser
+                onResult(true)
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al actualizar perfil: ${e.message}"
                 onResult(false)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    fun actualizarTheme(username: String, currentMode: Boolean) {
+    fun updatePassword(nuevaPass: String, onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
-            val nuevoModo = !currentMode
-            userDao.updateTheme(username, nuevoModo)
-            _isDarkMode.value = nuevoModo
-            cargarDatosUsuario(username)
+            _isLoading.value = true
+            try {
+                auth.currentUser?.updatePassword(nuevaPass)?.await()
+                onResult(true)
+            } catch (e: Exception) {
+                _errorMessage.value = "Error al actualizar contraseña: ${e.message}"
+                onResult(false)
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
-    fun verificarSiExiste(username: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val usuario = userDao.getUserByUsername(username.trim())
-            val existe = usuario != null
-            onResult(existe)
-        }
+
+    fun limpiarError() {
+        _errorMessage.value = null
     }
+
+    private fun mensajeDeError(e: Exception): String = when {
+        e.message?.contains("already in use")    == true -> "Este correo ya está registrado"
+        e.message?.contains("badly formatted")   == true -> "El formato del correo no es válido"
+        e.message?.contains("at least 6")        == true -> "La contraseña debe tener al menos 6 caracteres"
+        e.message?.contains("no user record")    == true -> "No existe una cuenta con ese correo"
+        e.message?.contains("password is wrong") == true -> "Contraseña incorrecta"
+        else -> "Error: ${e.message}"
+    }
+
+    // Compatibilidad con pantallas que leen esto
+    val password: StateFlow<String> = MutableStateFlow("")
+    val isDarkMode: StateFlow<Boolean> = MutableStateFlow(false)
+    val biometriaHabilitada: StateFlow<Boolean> = MutableStateFlow(false)
 }

@@ -73,10 +73,7 @@ fun AppNavigation(
         // Login
         composable(Screen.Login.route) {
             LoginScreen(
-                viewModel           = authViewModel,
-                onNavigateToForgetPass = {
-                    navController.navigate("${Screen.CambiarContra.route}/true")
-                },
+                viewModel            = authViewModel,
                 onNavigateToRegister = { navController.navigate(Screen.Registro.route) },
                 onLoginSuccess = {
                     navController.navigate(Screen.MiCloset.route) {
@@ -86,7 +83,6 @@ fun AppNavigation(
             )
         }
 
-        // Registro
         composable(Screen.Registro.route) {
             RegistroScreen(
                 viewModel = authViewModel,
@@ -97,6 +93,8 @@ fun AppNavigation(
                 }
             )
         }
+
+
 
         // Mi Closet
         composable(Screen.MiCloset.route) {
