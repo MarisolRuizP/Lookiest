@@ -61,7 +61,7 @@ fun CambiarContraScreen(
     val passGuardada by viewModel.password.collectAsState()
     val context = LocalContext.current
 
-    var passAnterior by remember(passGuardada) { mutableStateOf(passGuardada) }
+    var passAnterior by remember { mutableStateOf("") }
     var passNueva by remember { mutableStateOf("") }
     var passConfirmar by remember { mutableStateOf("") }
 
@@ -74,15 +74,6 @@ fun CambiarContraScreen(
     val biometriaActiva by viewModel.biometriaHabilitada.collectAsState()
 
     val biometricHelper = remember { BiometricHelper(context) }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        uri?.let {
-            // Nota: Tu AuthViewModel actual no tiene función para subir fotos a Firebase Storage.
-            Toast.makeText(context, "Sube la foto desde Editar Perfil", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -122,16 +113,6 @@ fun CambiarContraScreen(
                     error = painterResource(id = R.drawable.ic_launcher_foreground),
                     placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
                 )
-                IconButton(
-                    onClick = {
-                        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface, CircleShape)
-                        .size(30.dp)
-                ) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onTertiaryContainer)
-                }
             }
 
             Spacer(modifier = Modifier.height(30.dp))

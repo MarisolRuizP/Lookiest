@@ -1,11 +1,14 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
+import android.content.Context
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,22 +25,28 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,10 +61,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import ruiz.marisol.lookiest.R
 import ruiz.marisol.lookiest.ui.theme.components.CampoEditar
+import ruiz.marisol.lookiest.ui.theme.components.rememberCameraHandler
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +90,32 @@ fun EditarPerfilScreen(
         uri?.let {
             // Nota: Tu AuthViewModel no tiene función para actualizar fotos de Firebase todavía
             Toast.makeText(context, "La subida de fotos se implementará pronto", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    var showPhotoOptions by remember { mutableStateOf(false) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {fotoUri ->
+            viewModel.subirFoto(fotoUri, context) { exito ->
+                if (exito) {
+                    Toast.makeText(context, "¡Foto de perfil actualizada desde Galería!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Error al subir la foto de Galería", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    val cameraHandler = rememberCameraHandler { uri ->
+        viewModel.subirFoto(uri, context) { exito ->
+            if (exito) {
+                Toast.makeText(context, "¡Foto de perfil actualizada!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Error al subir a Firebase", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -122,9 +160,7 @@ fun EditarPerfilScreen(
                     placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
                 )
                 IconButton(
-                    onClick = {
-                        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
+                    onClick = { showPhotoOptions = true },
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surface, CircleShape)
                         .size(30.dp)
@@ -199,5 +235,51 @@ fun EditarPerfilScreen(
             containerColor = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(15.dp)
         )
+    }
+    if (showPhotoOptions) {
+        ModalBottomSheet(
+            onDismissRequest = { showPhotoOptions = false },
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp, top = 8.dp)
+            ) {
+                Text(
+                    text = "Selecciona una opción",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                ListItem(
+                    headlineContent = { Text("Tomar foto (Cámara)") },
+                    leadingContent = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        showPhotoOptions = false
+                        val uriSegura = cameraHandler.obtenerUri()
+                        if (uriSegura != null) {
+                            cameraHandler.launcher.launch(uriSegura)
+                        }
+                    }
+                )
+
+                ListItem(
+                    headlineContent = { Text("Elegir de Galería") },
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.PhotoLibrary,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        showPhotoOptions = false
+                        galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    }
+                )
+            }
+        }
     }
 }

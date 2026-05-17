@@ -52,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,6 +74,7 @@ import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTextField
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
 import ruiz.marisol.lookiest.ui.theme.components.SelectorMultiple
+import ruiz.marisol.lookiest.ui.theme.components.rememberCameraHandler
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 import java.io.File
 
@@ -131,20 +133,20 @@ fun AgregarPrendaScreen(
     val formalidades = viewModel.formalidades
     val colores = viewModel.colores
 
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+    var imageUriPath by rememberSaveable { mutableStateOf<String?>(null) }
+    val imageUri = imageUriPath?.let { Uri.parse(it) }
+
     var mostrarMenuFoto by remember { mutableStateOf(false) }
 
+    // Launcher de Galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
-        if (uri != null) imageUri = uri
+        if (uri != null) imageUriPath = uri.toString()
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) imageUri = tempImageUri
+    val cameraHandler = rememberCameraHandler { uri ->
+        imageUriPath = uri.toString()
     }
 
     if (mostrarMenuFoto) {
@@ -155,14 +157,10 @@ fun AgregarPrendaScreen(
             confirmButton = {
                 TextButton(onClick = {
                     mostrarMenuFoto = false
-                    val file = context.createImageFile()
-                    val uri = FileProvider.getUriForFile(
-                        context,
-                        "${context.packageName}.fileprovider",
-                        file
-                    )
-                    tempImageUri = uri
-                    cameraLauncher.launch(uri)
+                    val uriSegura = cameraHandler.obtenerUri()
+                    if (uriSegura != null) {
+                        cameraHandler.launcher.launch(uriSegura)
+                    }
                 }) {
                     Text("Cámara", color = MaterialTheme.colorScheme.primary)
                 }

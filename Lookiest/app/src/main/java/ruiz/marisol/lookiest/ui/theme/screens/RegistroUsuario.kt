@@ -216,7 +216,6 @@ fun RegistroScreen(
                                     onRegistrationComplete()
                                 },
                                 onError = { error ->
-                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
                                 }
                             )
                         }

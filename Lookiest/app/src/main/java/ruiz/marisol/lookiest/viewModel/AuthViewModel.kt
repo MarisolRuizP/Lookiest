@@ -1,15 +1,19 @@
 package ruiz.marisol.lookiest.viewModel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.io.InputStream
 
 class AuthViewModel : ViewModel() {
 
@@ -30,6 +34,12 @@ class AuthViewModel : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _isDarkMode = MutableStateFlow(false)
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+
+    private val _biometriaHabilitada = MutableStateFlow(false)
+    val biometriaHabilitada: StateFlow<Boolean> = _biometriaHabilitada.asStateFlow()
 
     // Registro
 
@@ -166,6 +176,48 @@ class AuthViewModel : ViewModel() {
 
     // Compatibilidad con pantallas que leen esto
     val password: StateFlow<String> = MutableStateFlow("")
-    val isDarkMode: StateFlow<Boolean> = MutableStateFlow(false)
-    val biometriaHabilitada: StateFlow<Boolean> = MutableStateFlow(false)
+
+    fun cambiarBiometriaFirebase(nuevoEstado: Boolean) {
+        viewModelScope.launch {
+            val email = auth.currentUser?.email ?: ""
+            if (email.isNotEmpty()) {
+                _biometriaHabilitada.value = nuevoEstado
+            }
+        }
+    }
+
+    fun cambiarTemaFirebase(estadoActual: Boolean) {
+        viewModelScope.launch {
+            val email = auth.currentUser?.email ?: ""
+            if (email.isNotEmpty()) {
+                val nuevoModo = !estadoActual
+                _isDarkMode.value = nuevoModo
+            }
+        }
+    }
+
+    fun subirFoto(fileUri: Uri, context: Context, onResult: (Boolean) -> Unit) {
+        val user = auth.currentUser ?: return onResult(false)
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setPhotoUri(fileUri)
+                    .build()
+
+                user.updateProfile(profileUpdates).await()
+
+                auth.currentUser?.reload()?.await()
+                _currentUser.value = auth.currentUser
+
+                onResult(true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult(false)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }

@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -109,8 +110,9 @@ fun LoginScreen(
                 modifier      = Modifier.fillMaxWidth().height(56.dp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor   = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
                 ),
                 singleLine      = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
@@ -132,8 +134,9 @@ fun LoginScreen(
                 modifier      = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor   = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
                 ),
                 singleLine            = true,
                 visualTransformation  = if (passVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -164,7 +167,6 @@ fun LoginScreen(
                 onClick = {
                     viewModel.login(email.trim(), pass.trim()) { success ->
                         if (!success) {
-                            Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                         }
                     }
                 },

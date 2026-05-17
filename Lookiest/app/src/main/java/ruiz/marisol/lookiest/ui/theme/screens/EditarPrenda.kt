@@ -51,6 +51,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,6 +74,7 @@ import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTextField
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
 import ruiz.marisol.lookiest.ui.theme.components.SelectorMultiple
+import ruiz.marisol.lookiest.ui.theme.components.rememberCameraHandler
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -90,6 +92,7 @@ fun EditarPrendaScreen(
     var imageUri by remember {
         mutableStateOf(prendaInicial.imagen?.let { Uri.parse(it) })
     }
+
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     var mostrarMenuFoto by remember { mutableStateOf(false) }
 
@@ -101,12 +104,8 @@ fun EditarPrendaScreen(
         }
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            imageUri = tempImageUri
-        }
+    val cameraHandler = rememberCameraHandler { uri ->
+        imageUri = uri
     }
 
     var nombre by remember { mutableStateOf(prendaInicial.nombre) }
@@ -134,19 +133,15 @@ fun EditarPrendaScreen(
     if (mostrarMenuFoto) {
         AlertDialog(
             onDismissRequest = { mostrarMenuFoto = false },
-            title = { Text("Cambiar foto") },
-            text = { Text("¿Desde dónde quieres agregar la nueva foto de la prenda?") },
+            title = { Text("Agregar foto") },
+            text = { Text("¿Desde dónde quieres agregar la foto de la prenda?") },
             confirmButton = {
                 TextButton(onClick = {
                     mostrarMenuFoto = false
-                    val file = context.createImageFile()
-                    val uri = FileProvider.getUriForFile(
-                        context,
-                        "${context.packageName}.fileprovider",
-                        file
-                    )
-                    tempImageUri = uri
-                    cameraLauncher.launch(uri)
+                    val uriSegura = cameraHandler.obtenerUri()
+                    if (uriSegura != null) {
+                        cameraHandler.launcher.launch(uriSegura)
+                    }
                 }) {
                     Text("Cámara", color = MaterialTheme.colorScheme.primary)
                 }
@@ -241,8 +236,14 @@ fun EditarPrendaScreen(
                         }
                     }
                     IconButton(
-                        onClick  = { /* abrir galería/cámara */ },
-                        modifier = Modifier.align(Alignment.BottomEnd)
+                        onClick  = { mostrarMenuFoto = true },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(12.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                shape = CircleShape
+                            )
                     ) {
                         Icon(
                             Icons.Default.CameraAlt,
