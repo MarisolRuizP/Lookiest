@@ -9,5 +9,7 @@ data class UsoOutfit(
     val id: Int = 0,
     val userEmail: String = "",
     val oufitId: Int,
-    val fecha: String
+    val fecha: String,
+    val syncPendiente: Boolean = true,
+    val firestoreId: String = ""
 )

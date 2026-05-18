@@ -18,6 +18,28 @@ class OutfitRepository(
     fun obtenerOutfits(email: String): Flow<List<Outfit>> =
         outfitDao.obtenerTodosLosOutfits(email)
 
+    suspend fun obtenerOutfitsPublicos(): List<Outfit> {
+        return try {
+            firestore.collection("outfits")
+                .whereEqualTo("esPublico", true)
+                .get()
+                .await()
+                .documents
+                .mapNotNull { doc ->
+                    Outfit(
+                        id          = 0,
+                        firestoreId = doc.id,
+                        userEmail   = doc.getString("userEmail") ?: "",
+                        nombre      = doc.getString("nombre") ?: "",
+                        prendas     = doc.getString("prendas") ?: "",
+                        esPublico   = true,
+                        etiquetas   = doc.getString("etiquetas") ?: "",
+                        creadoPor   = doc.getString("creadoPor") ?: ""
+                    )
+                }
+        } catch (e: Exception) { emptyList() }
+    }
+
     fun obtenerOutfitDeHoy(email: String): Flow<Outfit?> =
         outfitDao.obtenerOutfitDeHoy(email)
 

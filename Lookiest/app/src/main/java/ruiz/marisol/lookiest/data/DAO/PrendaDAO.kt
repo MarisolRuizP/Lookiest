@@ -40,4 +40,10 @@ interface PrendaDao {
 
     @Query("UPDATE prendas SET usadaHoy = 0")
     suspend fun resetUsadasHoy()
+
+    @Query("SELECT * FROM prendas WHERE syncPendiente = 1")
+    suspend fun obtenerPendientesDeSync(): List<PrendaRopa>
+
+    @Query("UPDATE prendas SET syncPendiente = 0, firestoreId = :firestoreId WHERE id = :id")
+    suspend fun marcarComoSincronizado(id: Int, firestoreId: String)
 }

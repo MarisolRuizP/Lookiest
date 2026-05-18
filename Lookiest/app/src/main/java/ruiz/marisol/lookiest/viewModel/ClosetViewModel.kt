@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ruiz.marisol.lookiest.data.DAO.PrendaDao
-import ruiz.marisol.lookiest.data.DAO.UsoOutfitDao
 import ruiz.marisol.lookiest.data.NetworkSyncManager
 import ruiz.marisol.lookiest.data.Outfit
 import ruiz.marisol.lookiest.data.OutfitRepository
+import ruiz.marisol.lookiest.data.PrendaRepository
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.data.UsoOutfit
+import ruiz.marisol.lookiest.data.UsoRepository
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -23,9 +23,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class ClosetViewModel(
-    private val prendaDAO: PrendaDao,
+    private val prendaRepository: PrendaRepository,
     private val outfitRepository: OutfitRepository,
-    private val usoDAO: UsoOutfitDao,
+    private val usoRepository: UsoRepository,
     private val userEmail: String,
     context: Context
 ) : ViewModel() {
@@ -50,7 +50,7 @@ class ClosetViewModel(
     )
 
     init {
-        NetworkSyncManager(context, outfitRepository)
+        NetworkSyncManager(context, outfitRepository, prendaRepository, usoRepository)
             .startListening(viewModelScope)
         iniciarMonitorConexion(context)
     }
@@ -73,7 +73,7 @@ class ClosetViewModel(
         })
     }
 
-    val prendas: StateFlow<List<PrendaRopa>> = prendaDAO
+    val prendas: StateFlow<List<PrendaRopa>> = prendaRepository
         .obtenerTodasLasPrendas(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -81,7 +81,7 @@ class ClosetViewModel(
         .obtenerOutfits(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val prendasUsadasHoy: StateFlow<List<PrendaRopa>> = prendaDAO
+    val prendasUsadasHoy: StateFlow<List<PrendaRopa>> = prendaRepository
         .obtenerUsadasHoy(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -89,32 +89,32 @@ class ClosetViewModel(
         .obtenerOutfitDeHoy(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val usos: StateFlow<List<UsoOutfit>> = usoDAO
+    val usos: StateFlow<List<UsoOutfit>> = usoRepository
         .obtenerTodos(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun agregarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
-        prendaDAO.insertarPrenda(prenda.copy(userEmail = userEmail))
+        prendaRepository.guardarPrenda(prenda.copy(userEmail = userEmail))
     }
 
     fun eliminarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
-        prendaDAO.eliminarPrenda(prenda)
+        prendaRepository.eliminarPrenda(prenda)
     }
 
     fun actualizarPrenda(prendaActualizada: PrendaRopa) = viewModelScope.launch {
-        prendaDAO.actualizarPrenda(prendaActualizada)
+        prendaRepository.actualizarPrenda(prendaActualizada)
     }
 
     fun favorito(prenda: PrendaRopa) = viewModelScope.launch {
-        prendaDAO.actualizarPrenda(prenda.copy(favorito = !prenda.favorito))
+        prendaRepository.toggleFavorito(prenda.id)
     }
 
     fun toggleUsadaHoy(id: Int, usada: Boolean) = viewModelScope.launch {
-        prendaDAO.setUsadaHoy(id, usada)
+        prendaRepository.setUsadaHoy(id, usada)
     }
 
     fun resetUsadasHoy() = viewModelScope.launch {
-        prendaDAO.resetUsadasHoy()
+        prendaRepository.resetUsadasHoy()
     }
 
     fun agregarOutfit(outfit: Outfit) = viewModelScope.launch {
@@ -129,10 +129,17 @@ class ClosetViewModel(
         outfitRepository.actualizarOutfit(outfitActualizado)
     }
 
+    private val _outfitsPublicos = MutableStateFlow<List<Outfit>>(emptyList())
+    val outfitsPublicos: StateFlow<List<Outfit>> = _outfitsPublicos.asStateFlow()
+
+    fun cargarOutfitsPublicos() = viewModelScope.launch {
+        _outfitsPublicos.value = outfitRepository.obtenerOutfitsPublicos()
+    }
+
     fun setOutfitDeHoy(outfitId: Int) = viewModelScope.launch {
         outfitRepository.setOutfitDeHoy(userEmail, outfitId)
         outfitRepository.incrementarUsos(outfitId)
-        usoDAO.insertar(
+        usoRepository.insertar(
             UsoOutfit(
                 userEmail = userEmail,
                 oufitId   = outfitId,
@@ -142,16 +149,16 @@ class ClosetViewModel(
     }
 
     fun eliminarUso(uso: UsoOutfit) = viewModelScope.launch {
-        usoDAO.eliminar(uso)
+        usoRepository.eliminar(uso)
     }
 
     fun guardarUsoDiario() = viewModelScope.launch {
         val hoy = java.time.LocalDate.now().toString()
         val ids = prendasUsadasHoy.value.map { it.id }
         if (ids.isEmpty()) return@launch
-        usoDAO.eliminarPorFecha(userEmail, hoy)
+        usoRepository.eliminarPorFecha(userEmail, hoy)
         ids.forEach { prendaId ->
-            usoDAO.insertar(UsoOutfit(userEmail = userEmail, oufitId = prendaId, fecha = hoy))
+            usoRepository.insertar(UsoOutfit(userEmail = userEmail, oufitId = prendaId, fecha = hoy))
         }
     }
 

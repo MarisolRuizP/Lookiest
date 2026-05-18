@@ -10,6 +10,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import ruiz.marisol.lookiest.data.LookiestDatabase
 import ruiz.marisol.lookiest.data.OutfitRepository
+import ruiz.marisol.lookiest.data.PrendaRepository
+import ruiz.marisol.lookiest.data.UsoRepository
 import ruiz.marisol.lookiest.navigation.AppNavigation
 import ruiz.marisol.lookiest.ui.theme.LookiestTheme
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
@@ -38,13 +40,21 @@ class MainActivity : FragmentActivity() {
                     outfitDao = database.outfitDao(),
                     context   = applicationContext
                 )
+                val prendaRepository = PrendaRepository(
+                    prendaDao = database.prendaDao(),
+                    context   = applicationContext
+                )
+                val usoRepository = UsoRepository(
+                    usoDao  = database.usoOutfitDao(),
+                    context = applicationContext
+                )
 
                 val closetViewModel = ViewModelProvider(
                     this@MainActivity,
                     ClosetViewModelFactory(
-                        prendaDao        = database.prendaDao(),
+                        prendaRepository = prendaRepository,
                         outfitRepository = outfitRepository,
-                        usoDao           = database.usoOutfitDao(),
+                        usoRepository    = usoRepository,
                         userEmail        = email,
                         context          = applicationContext
                     )

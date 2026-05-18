@@ -19,5 +19,7 @@ data class PrendaRopa(
     val formalidad: String,
     val imagen: String? = null,
     val favorito: Boolean = false,
-    val usadaHoy: Boolean = false
+    val usadaHoy: Boolean = false,
+    val syncPendiente: Boolean = true,
+    val firestoreId: String = ""
 )

@@ -10,7 +10,9 @@ import kotlinx.coroutines.launch
 
 class NetworkSyncManager(
     context: Context,
-    private val repository: OutfitRepository
+    private val outfitRepository: OutfitRepository,
+    private val prendaRepository: PrendaRepository,
+    private val usoRepository: UsoRepository
 ) {
     private val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -21,7 +23,11 @@ class NetworkSyncManager(
 
         cm.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                scope.launch { repository.sincronizarPendientes() }
+                scope.launch {
+                    outfitRepository.sincronizarPendientes()
+                    prendaRepository.sincronizarPendientes()
+                    usoRepository.sincronizarPendientes()
+                }
             }
         })
     }

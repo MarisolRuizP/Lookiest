@@ -24,4 +24,10 @@ interface UsoOutfitDao {
 
     @Query("DELETE FROM usosOutfit WHERE userEmail = :email AND fecha = :fecha")
     suspend fun eliminarPorFecha(email: String, fecha: String)
+
+    @Query("SELECT * FROM usosOutfit WHERE syncPendiente = 1")
+    suspend fun obtenerPendientesDeSync(): List<UsoOutfit>
+
+    @Query("UPDATE usosOutfit SET syncPendiente = 0, firestoreId = :firestoreId WHERE id = :id")
+    suspend fun marcarComoSincronizado(id: Int, firestoreId: String)
 }

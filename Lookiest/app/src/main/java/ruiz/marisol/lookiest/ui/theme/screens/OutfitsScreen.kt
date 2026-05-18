@@ -49,14 +49,19 @@ fun OutfitsScreen(
     navController: NavController
 ) {
     val outfits by viewModel.outfits.collectAsState(initial = emptyList())
+    val outfitsPublicos by viewModel.outfitsPublicos.collectAsState()
     val todasLasPrendas by viewModel.prendas.collectAsState(initial = emptyList())
 
     var tabSeleccionado by remember { mutableStateOf(0) }
+    LaunchedEffect(tabSeleccionado) {
+        if (tabSeleccionado == 1) {
+            viewModel.cargarOutfitsPublicos()
+        }
+    }
     var busqueda by remember { mutableStateOf("") }
 
     val misOutfits = outfits.filter { it.creadoPor == viewModel.usuarioActualEmail }
-    val explorar = outfits.filter { it.esPublico && it.creadoPor != viewModel.usuarioActualEmail}
-
+    val explorar = outfitsPublicos
     val listaActual = if (tabSeleccionado == 0) misOutfits else explorar
 
     val listaFiltrada = remember(busqueda, listaActual) {
@@ -174,7 +179,7 @@ fun OutfitsScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(listaFiltrada, key = { it.id }) { outfit ->
+                    items(listaFiltrada, key = { it.firestoreId.ifEmpty { it.id.toString() } }) { outfit ->
                         OutfitRow(
                             outfit = outfit,
                             todasLasPrendas = todasLasPrendas,
