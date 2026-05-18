@@ -21,6 +21,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import android.net.Uri
 
 class ClosetViewModel(
     private val prendaRepository: PrendaRepository,
@@ -93,16 +94,16 @@ class ClosetViewModel(
         .obtenerTodos(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun agregarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
-        prendaRepository.guardarPrenda(prenda.copy(userEmail = userEmail))
+    fun agregarPrenda(prenda: PrendaRopa, imagenUri: Uri? = null) = viewModelScope.launch {
+        prendaRepository.guardarPrenda(prenda.copy(userEmail = userEmail), imagenUri)
     }
 
     fun eliminarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
         prendaRepository.eliminarPrenda(prenda)
     }
 
-    fun actualizarPrenda(prendaActualizada: PrendaRopa) = viewModelScope.launch {
-        prendaRepository.actualizarPrenda(prendaActualizada)
+    fun actualizarPrenda(prendaActualizada: PrendaRopa, imagenUri: Uri? = null) = viewModelScope.launch {
+        prendaRepository.actualizarPrenda(prendaActualizada, imagenUri)
     }
 
     fun favorito(prenda: PrendaRopa) = viewModelScope.launch {

@@ -200,6 +200,12 @@ fun OutfitRow(
 ) {
     val idsPrendas = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
     val prendasDelOutfit = todasLasPrendas.filter { it.id in idsPrendas }
+    
+    val imagenesAMostrar = if (prendasDelOutfit.isNotEmpty()) {
+        prendasDelOutfit.take(5).map { it.imagen ?: "" }
+    } else {
+        outfit.imagenesUrls.take(5)
+    }
 
     Card(
         shape = RoundedCornerShape(14.dp),
@@ -220,17 +226,28 @@ fun OutfitRow(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                prendasDelOutfit.take(5).forEach { prenda ->
-                    PrendaMiniatura(prenda)
-                }
-                val faltantes = 5 - prendasDelOutfit.size
-                if (faltantes > 0) {
-                    repeat(faltantes) {
+                val totalMostrar = 5
+                repeat(totalMostrar) { i ->
+                    val url = imagenesAMostrar.getOrNull(i)
+                    if (!url.isNullOrEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .size(58.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.background)
+                        ) {
+                            AsyncImage(
+                                model = url,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    } else {
                         PlaceholderMiniatura()
                     }
                 }
             }
-
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "Ver outfit",

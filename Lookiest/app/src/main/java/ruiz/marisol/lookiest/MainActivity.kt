@@ -17,6 +17,7 @@ import ruiz.marisol.lookiest.ui.theme.LookiestTheme
 import ruiz.marisol.lookiest.viewModel.AuthViewModel
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
 import ruiz.marisol.lookiest.viewModel.ClosetViewModelFactory
+import ruiz.marisol.lookiest.data.CloudinaryManager
 
 @Suppress("UNCHECKED_CAST")
 class MainActivity : FragmentActivity() {
@@ -26,6 +27,7 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        CloudinaryManager.init(applicationContext)
 
         val database = LookiestDatabase.getDatabase(applicationContext)
 

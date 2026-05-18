@@ -64,13 +64,17 @@ fun CrearOutfitScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
+                    val prendasDelOutfit = allPrendas.filter { it.id in prendasSeleccionadas }
+                    val urls = prendasDelOutfit.mapNotNull { it.imagen }.filter { it.isNotEmpty() }
+
                     val nuevoFit = Outfit(
                         id = 0,
-                        nombre = nombreOutfit.ifBlank { "Mi fit idk" },
+                        nombre = nombreOutfit.ifBlank { "Mi outfit" },
                         prendas = prendasSeleccionadas.joinToString(","),
                         esPublico = esPublico,
                         etiquetas = etiquetas.joinToString(","),
-                        creadoPor = viewModel.usuarioActualEmail
+                        creadoPor = viewModel.usuarioActualEmail,
+                        imagenesUrls = urls
                     )
                     viewModel.agregarOutfit(nuevoFit)
                     onGuardar()

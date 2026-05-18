@@ -18,5 +18,6 @@ data class Outfit(
     val totalUsos: Int = 0,
     val esOutfitDeHoy: Boolean = false,
     val syncPendiente: Boolean = true,
-    val firestoreId: String = ""
+    val firestoreId: String = "",
+    val imagenesUrls: List<String> = emptyList()
 )

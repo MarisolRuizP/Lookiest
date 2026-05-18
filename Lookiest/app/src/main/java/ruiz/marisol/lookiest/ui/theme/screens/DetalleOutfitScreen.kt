@@ -54,9 +54,10 @@ fun DetalleOutfitScreen(
 ) {
     val esPropio = outfit.creadoPor == viewModel.usuarioActualEmail || outfit.creadoPor == "Mi"
     val todasLasPrendas by viewModel.prendas.collectAsState(initial = emptyList())
-
+    
     val idsPrendasOutfit = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
     val prendasDelOutfit = todasLasPrendas.filter { it.id in idsPrendasOutfit }
+    val esDeOtroUsuario = prendasDelOutfit.isEmpty() && outfit.imagenesUrls.isNotEmpty()
     val etiquetasLista = outfit.etiquetas.split(",").filter { it.isNotBlank() }
 
     // Estado local de likes / favorito
@@ -220,9 +221,33 @@ fun DetalleOutfitScreen(
                 }
             }
 
-            // Prendas filtradas
-            items(prendasDelOutfit, key = { it.id }) { prenda ->
-                PrendaDetalleRow(prenda)
+            if (esDeOtroUsuario) {
+                items(outfit.imagenesUrls, key = { it }) { url ->
+                    Card(
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                        ) {
+                            AsyncImage(
+                                model = url,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    }
+                }
+            } else {
+                items(prendasDelOutfit, key = { it.id }) { prenda ->
+                    PrendaDetalleRow(prenda)
+                }
             }
             item { Spacer(Modifier.height(8.dp)) }
 

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,6 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
 }
+
+val localProperties = Properties()
+rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { localProperties.load(it) }
 
 android {
     namespace = "ruiz.marisol.lookiest"
@@ -16,8 +21,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${localProperties["CLOUDINARY_CLOUD_NAME"]}\"")
+        buildConfigField("String", "CLOUDINARY_API_KEY", "\"${localProperties["CLOUDINARY_API_KEY"]}\"")
     }
 
     buildTypes {
@@ -36,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     kotlin {
         compilerOptions {
@@ -68,7 +75,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore-ktx")
-
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

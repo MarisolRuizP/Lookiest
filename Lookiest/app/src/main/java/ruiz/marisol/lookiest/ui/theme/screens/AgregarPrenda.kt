@@ -183,7 +183,6 @@ fun AgregarPrendaScreen(
             mensaje = "¿Deseas guardar la nueva prenda?",
             onCancelar = { mostrarDialogoGuardar = false },
             onConfirmar = {
-                val rutaImagen = imageUri?.let { context.copiarImagenAInternos(it) }
                 mostrarDialogoGuardar = false
                 val nuevaPrenda = PrendaRopa(
                     id = 0,
@@ -196,10 +195,9 @@ fun AgregarPrendaScreen(
                     tags = tagsSeleccionadas.toList(),
                     temporada = temporadasSeleccionadas.toList(),
                     formalidad = formalidad,
-                    imagen = rutaImagen,
                     favorito = false
                 )
-                viewModel.agregarPrenda(nuevaPrenda)
+                viewModel.agregarPrenda(nuevaPrenda, imageUri)
                 onGuardado()
             }
         )

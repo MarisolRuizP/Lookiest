@@ -64,11 +64,15 @@ fun EditarOutfitScreen(
             onCancelar  = { mostrarDialogoGuardar = false },
             onConfirmar = {
                 mostrarDialogoGuardar = false
+                val prendasDelOutfit = allPrendas.filter { it.id in prendasSeleccionadas }
+                val urls = prendasDelOutfit.mapNotNull { it.imagen }.filter { it.isNotEmpty() }
+
                 val outfitActualizado = outfitInicial.copy(
-                    nombre    = nombre.ifBlank { "Mi Outfit" },
-                    prendas   = prendasSeleccionadas.joinToString(","),
-                    esPublico = esPublico,
-                    etiquetas = etiquetas.joinToString(",")
+                    nombre       = nombre.ifBlank { "Mi Outfit" },
+                    prendas      = prendasSeleccionadas.joinToString(","),
+                    esPublico    = esPublico,
+                    etiquetas    = etiquetas.joinToString(","),
+                    imagenesUrls = urls  // ← nuevo
                 )
                 viewModel.actualizarOutfit(outfitActualizado)
                 onGuardado()

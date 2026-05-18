@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import ruiz.marisol.lookiest.data.DAO.PrendaDao
+import android.net.Uri
 
 class PrendaRepository(
     private val prendaDao: PrendaDao,
@@ -27,17 +28,21 @@ class PrendaRepository(
     suspend fun obtenerPrendaPorId(id: Int): PrendaRopa? =
         prendaDao.obtenerPrendaPorId(id)
 
-    suspend fun guardarPrenda(prenda: PrendaRopa) {
-        val id = prendaDao.insertarPrenda(prenda)
+    suspend fun guardarPrenda(prenda: PrendaRopa, imagenUri: Uri? = null) {
+        val urlImagen = imagenUri?.let { CloudinaryManager.subirImagen(context, it) }
+        val prendaConImagen = prenda.copy(imagen = urlImagen)
+        val id = prendaDao.insertarPrenda(prendaConImagen)
         if (hayInternet()) {
-            subirAFirestore(prenda.copy(id = id.toInt()))
+            subirAFirestore(prendaConImagen.copy(id = id.toInt()))
         }
     }
 
-    suspend fun actualizarPrenda(prenda: PrendaRopa) {
-        prendaDao.actualizarPrenda(prenda)
-        if (hayInternet() && prenda.firestoreId.isNotEmpty()) {
-            actualizarEnFirestore(prenda)
+    suspend fun actualizarPrenda(prenda: PrendaRopa, imagenUri: Uri? = null) {
+        val urlImagen = imagenUri?.let { CloudinaryManager.subirImagen(context, it) }
+        val prendaConImagen = if (urlImagen != null) prenda.copy(imagen = urlImagen) else prenda
+        prendaDao.actualizarPrenda(prendaConImagen)
+        if (hayInternet() && prendaConImagen.firestoreId.isNotEmpty()) {
+            actualizarEnFirestore(prendaConImagen)
         }
     }
 

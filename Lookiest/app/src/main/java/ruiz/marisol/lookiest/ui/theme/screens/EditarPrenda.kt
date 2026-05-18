@@ -165,7 +165,6 @@ fun EditarPrendaScreen(
             onCancelar  = { mostrarDialogoGuardar = false },
             onConfirmar = {
                 mostrarDialogoGuardar = false
-
                 val prendaActualizada = prendaInicial.copy(
                     nombre = nombre,
                     tienda = tienda,
@@ -175,10 +174,10 @@ fun EditarPrendaScreen(
                     categoria = categoria,
                     tags = tagsSeleccionadas.toList(),
                     temporada = temporadasSeleccionadas.toList(),
-                    formalidad = formalidad,
-                    imagen = imageUri?.toString()
+                    formalidad = formalidad
                 )
-                viewModel.actualizarPrenda(prendaActualizada)
+                val nuevaUri = if (imageUri?.toString() != prendaInicial.imagen) imageUri else null
+                viewModel.actualizarPrenda(prendaActualizada, nuevaUri)
                 onGuardado()
             }
         )

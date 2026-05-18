@@ -27,14 +27,16 @@ class OutfitRepository(
                 .documents
                 .mapNotNull { doc ->
                     Outfit(
-                        id          = 0,
-                        firestoreId = doc.id,
-                        userEmail   = doc.getString("userEmail") ?: "",
-                        nombre      = doc.getString("nombre") ?: "",
-                        prendas     = doc.getString("prendas") ?: "",
-                        esPublico   = true,
-                        etiquetas   = doc.getString("etiquetas") ?: "",
-                        creadoPor   = doc.getString("creadoPor") ?: ""
+                        id            = 0,
+                        firestoreId   = doc.id,
+                        userEmail     = doc.getString("userEmail") ?: "",
+                        nombre        = doc.getString("nombre") ?: "",
+                        prendas       = doc.getString("prendas") ?: "",
+                        esPublico     = true,
+                        etiquetas     = doc.getString("etiquetas") ?: "",
+                        creadoPor     = doc.getString("creadoPor") ?: "",
+                        imagenesUrls  = (doc.get("imagenesUrls") as? List<*>)
+                            ?.filterIsInstance<String>() ?: emptyList()
                     )
                 }
         } catch (e: Exception) { emptyList() }
@@ -91,13 +93,12 @@ class OutfitRepository(
                 "likes"         to (outfit.likes ?: 0),
                 "favoritos"     to (outfit.favoritos ?: 0),
                 "totalUsos"     to outfit.totalUsos,
-                "esOutfitDeHoy" to outfit.esOutfitDeHoy
+                "esOutfitDeHoy" to outfit.esOutfitDeHoy,
+                "imagenesUrls"  to outfit.imagenesUrls  // ← nuevo
             )
             val docRef = outfitsRef.add(data).await()
             outfitDao.marcarComoSincronizado(outfit.id, docRef.id)
-        } catch (e: Exception) {
-            // queda syncPendiente = true, se reintenta después
-        }
+        } catch (e: Exception) { }
     }
 
     private suspend fun actualizarEnFirestore(outfit: Outfit) {
@@ -108,7 +109,8 @@ class OutfitRepository(
                 "esPublico"     to outfit.esPublico,
                 "etiquetas"     to outfit.etiquetas,
                 "totalUsos"     to outfit.totalUsos,
-                "esOutfitDeHoy" to outfit.esOutfitDeHoy
+                "esOutfitDeHoy" to outfit.esOutfitDeHoy,
+                "imagenesUrls"  to outfit.imagenesUrls  // ← nuevo
             )
             outfitsRef.document(outfit.firestoreId).update(data).await()
         } catch (e: Exception) { }
