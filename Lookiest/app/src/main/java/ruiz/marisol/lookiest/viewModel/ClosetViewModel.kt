@@ -1,32 +1,42 @@
 package ruiz.marisol.lookiest.viewModel
 
+import android.content.Context
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ruiz.marisol.lookiest.data.DAO.OutfitDao
 import ruiz.marisol.lookiest.data.DAO.PrendaDao
 import ruiz.marisol.lookiest.data.DAO.UsoOutfitDao
+import ruiz.marisol.lookiest.data.NetworkSyncManager
 import ruiz.marisol.lookiest.data.Outfit
+import ruiz.marisol.lookiest.data.OutfitRepository
 import ruiz.marisol.lookiest.data.PrendaRopa
 import ruiz.marisol.lookiest.data.UsoOutfit
-import androidx.compose.ui.graphics.Color
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class ClosetViewModel(
     private val prendaDAO: PrendaDao,
-    private val outfitDAO: OutfitDao,
+    private val outfitRepository: OutfitRepository,
     private val usoDAO: UsoOutfitDao,
-    private val userEmail: String
+    private val userEmail: String,
+    context: Context
 ) : ViewModel() {
 
-    private val _tallas      = listOf("XS", "S", "M", "L", "XL", "XXL")
-    private val _categorias  = listOf("Top", "Bottom", "OuterWear", "BodySuit", "Zapatos", "Accesorios")
-    private val _tags        = listOf("Leather", "Denim", "Pleated", "Knit", "Floral", "Lace")
-    private val _temporadas  = listOf("Primavera", "Verano", "Otoño", "Invierno")
-    private val _formalidades = listOf("Casual", "Formal", "Deportivo")
-    private val _opcionesColores = listOf(
+    val tallas       = listOf("XS", "S", "M", "L", "XL", "XXL")
+    val categorias   = listOf("Top", "Bottom", "OuterWear", "BodySuit", "Zapatos", "Accesorios")
+    val tags         = listOf("Leather", "Denim", "Pleated", "Knit", "Floral", "Lace")
+    val temporadas   = listOf("Primavera", "Verano", "Otoño", "Invierno")
+    val formalidades = listOf("Casual", "Formal", "Deportivo")
+    val usuarioActualEmail: String get() = userEmail
+    val colores      = listOf(
         "Rojo"     to Color(0xFF802626),
         "Azul"     to Color(0xFF0C6291),
         "Negro"    to Color(0xFF000004),
@@ -39,36 +49,49 @@ class ClosetViewModel(
         "Morado"   to Color(0xFF6A0572)
     )
 
-    val tallas       get() = _tallas
-    val categorias   get() = _categorias
-    val tags         get() = _tags
-    val temporadas   get() = _temporadas
-    val formalidades get() = _formalidades
-    val colores      get() = _opcionesColores
+    init {
+        NetworkSyncManager(context, outfitRepository)
+            .startListening(viewModelScope)
+        iniciarMonitorConexion(context)
+    }
+
+    private val _hayInternet = MutableStateFlow(true)
+    val hayInternet: StateFlow<Boolean> = _hayInternet.asStateFlow()
+
+    private fun iniciarMonitorConexion(context: Context) {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        cm.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                _hayInternet.value = true
+            }
+            override fun onLost(network: Network) {
+                _hayInternet.value = false
+            }
+        })
+    }
 
     val prendas: StateFlow<List<PrendaRopa>> = prendaDAO
         .obtenerTodasLasPrendas(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val outfits: StateFlow<List<Outfit>> = outfitDAO
-        .obtenerTodosLosOutfits(userEmail)
+    val outfits: StateFlow<List<Outfit>> = outfitRepository
+        .obtenerOutfits(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val prendasUsadasHoy: StateFlow<List<PrendaRopa>> = prendaDAO
         .obtenerUsadasHoy(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val outfitDeHoy: StateFlow<Outfit?> = outfitDAO
+    val outfitDeHoy: StateFlow<Outfit?> = outfitRepository
         .obtenerOutfitDeHoy(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val usos: StateFlow<List<UsoOutfit>> = usoDAO
         .obtenerTodos(userEmail)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    fun eliminarUso(uso: UsoOutfit) = viewModelScope.launch {
-        usoDAO.eliminar(uso)
-    }
 
     fun agregarPrenda(prenda: PrendaRopa) = viewModelScope.launch {
         prendaDAO.insertarPrenda(prenda.copy(userEmail = userEmail))
@@ -95,21 +118,20 @@ class ClosetViewModel(
     }
 
     fun agregarOutfit(outfit: Outfit) = viewModelScope.launch {
-        outfitDAO.insertarOutfit(outfit.copy(userEmail = userEmail))
+        outfitRepository.guardarOutfit(outfit.copy(userEmail = userEmail))
     }
 
     fun eliminarOutfit(outfit: Outfit) = viewModelScope.launch {
-        outfitDAO.eliminarOutfit(outfit)
+        outfitRepository.eliminarOutfit(outfit)
     }
 
     fun actualizarOutfit(outfitActualizado: Outfit) = viewModelScope.launch {
-        outfitDAO.actualizarOutfit(outfitActualizado)
+        outfitRepository.actualizarOutfit(outfitActualizado)
     }
 
     fun setOutfitDeHoy(outfitId: Int) = viewModelScope.launch {
-        outfitDAO.resetOutfitDeHoy(userEmail)
-        outfitDAO.setOutfitDeHoy(outfitId)
-        outfitDAO.incrementarUsos(outfitId)
+        outfitRepository.setOutfitDeHoy(userEmail, outfitId)
+        outfitRepository.incrementarUsos(outfitId)
         usoDAO.insertar(
             UsoOutfit(
                 userEmail = userEmail,
@@ -117,6 +139,10 @@ class ClosetViewModel(
                 fecha     = java.time.LocalDate.now().toString()
             )
         )
+    }
+
+    fun eliminarUso(uso: UsoOutfit) = viewModelScope.launch {
+        usoDAO.eliminar(uso)
     }
 
     fun guardarUsoDiario() = viewModelScope.launch {

@@ -70,7 +70,7 @@ fun CrearOutfitScreen(
                         prendas = prendasSeleccionadas.joinToString(","),
                         esPublico = esPublico,
                         etiquetas = etiquetas.joinToString(","),
-                        creadoPor = "Mi"
+                        creadoPor = viewModel.usuarioActualEmail
                     )
                     viewModel.agregarOutfit(nuevoFit)
                     onGuardar()

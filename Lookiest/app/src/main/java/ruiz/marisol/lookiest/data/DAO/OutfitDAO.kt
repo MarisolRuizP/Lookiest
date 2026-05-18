@@ -37,4 +37,10 @@ interface OutfitDao {
 
     @Query("UPDATE outfits SET totalUsos = totalUsos + 1 WHERE id = :id")
     suspend fun incrementarUsos(id: Int)
+
+    @Query("SELECT * FROM outfits WHERE syncPendiente = 1")
+    suspend fun obtenerPendientesDeSync(): List<Outfit>
+
+    @Query("UPDATE outfits SET syncPendiente = 0, firestoreId = :firestoreId WHERE id = :id")
+    suspend fun marcarComoSincronizado(id: Int, firestoreId: String)
 }

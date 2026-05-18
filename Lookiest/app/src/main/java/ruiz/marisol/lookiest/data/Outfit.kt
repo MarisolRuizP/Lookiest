@@ -16,5 +16,7 @@ data class Outfit(
     val likes: Int? = 0,
     val favoritos: Int? = 0,
     val totalUsos: Int = 0,
-    val esOutfitDeHoy: Boolean = false
+    val esOutfitDeHoy: Boolean = false,
+    val syncPendiente: Boolean = true,
+    val firestoreId: String = ""
 )

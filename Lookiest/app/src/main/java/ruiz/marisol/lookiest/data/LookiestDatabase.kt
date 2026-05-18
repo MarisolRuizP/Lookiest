@@ -12,7 +12,7 @@ import ruiz.marisol.lookiest.data.DAO.UsuarioDao
 
 @Database(
     entities = [PrendaRopa::class, Outfit::class, UsoOutfit::class, Usuario::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

@@ -33,6 +33,12 @@ import ruiz.marisol.lookiest.ui.theme.Rosa
 import ruiz.marisol.lookiest.ui.theme.components.LookiestBottomBar
 import ruiz.marisol.lookiest.ui.theme.components.LookiestTopBar
 import ruiz.marisol.lookiest.viewModel.ClosetViewModel
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.runtime.collectAsState
 
 
 @Composable
@@ -48,8 +54,8 @@ fun OutfitsScreen(
     var tabSeleccionado by remember { mutableStateOf(0) }
     var busqueda by remember { mutableStateOf("") }
 
-    val misOutfits = outfits.filter { it.creadoPor == "Mi" }
-    val explorar = outfits.filter { it.esPublico } //&& it.creadoPor != "Mi"
+    val misOutfits = outfits.filter { it.creadoPor == viewModel.usuarioActualEmail }
+    val explorar = outfits.filter { it.esPublico && it.creadoPor != viewModel.usuarioActualEmail}
 
     val listaActual = if (tabSeleccionado == 0) misOutfits else explorar
 
@@ -83,6 +89,35 @@ fun OutfitsScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
+            //banner del coso offline
+            val hayInternet by viewModel.hayInternet.collectAsState()
+            AnimatedVisibility(
+                visible = !hayInternet,
+                enter   = slideInVertically() + fadeIn(),
+                exit    = slideOutVertically() + fadeOut()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF5C5C5C))
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CloudOff,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Sin conexión · los outfits se guardan local",
+                        color = Color.White,
+                        fontSize = 12.sp
+                    )
+                }
+            }
 
             // buscador
             OutlinedTextField(
