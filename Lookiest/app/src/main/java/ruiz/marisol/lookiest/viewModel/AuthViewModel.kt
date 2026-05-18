@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -145,11 +146,16 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun updatePassword(nuevaPass: String, onResult: (Boolean) -> Unit = {}) {
+    fun updatePassword(nuevaPass: String, passAnterior: String = "", onResult: (Boolean) -> Unit = {}) {
+        val user = auth.currentUser ?: return onResult(false)
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                auth.currentUser?.updatePassword(nuevaPass)?.await()
+                if (passAnterior.isNotBlank()) {
+                    val credential = EmailAuthProvider.getCredential(user.email!!, passAnterior)
+                    user.reauthenticate(credential).await()
+                }
+                user.updatePassword(nuevaPass).await()
                 onResult(true)
             } catch (e: Exception) {
                 _errorMessage.value = "Error al actualizar contraseña: ${e.message}"
@@ -159,7 +165,6 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
-
 
     fun limpiarError() {
         _errorMessage.value = null
@@ -174,7 +179,6 @@ class AuthViewModel : ViewModel() {
         else -> "Error: ${e.message}"
     }
 
-    // Compatibilidad con pantallas que leen esto
     val password: StateFlow<String> = MutableStateFlow("")
 
     fun cambiarBiometriaFirebase(nuevoEstado: Boolean) {

@@ -22,8 +22,10 @@ class UsoRepository(
         usoDao.obtenerPorFecha(email, fecha)
 
     suspend fun insertar(uso: UsoOutfit) {
-        usoDao.insertar(uso)
-        if (hayInternet()) subirAFirestore(uso)
+        val id = usoDao.insertar(uso)
+        if (hayInternet()) {
+            subirAFirestore(uso.copy(id = id.toInt()))
+        }
     }
 
     suspend fun eliminar(uso: UsoOutfit) {

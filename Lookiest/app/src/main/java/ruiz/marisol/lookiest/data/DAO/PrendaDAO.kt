@@ -24,7 +24,7 @@ interface PrendaDao {
     suspend fun obtenerPrendaPorId(id: Int): PrendaRopa?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertarPrenda(prenda: PrendaRopa)
+    suspend fun insertarPrenda(prenda: PrendaRopa): Long
 
     @Update
     suspend fun actualizarPrenda(prenda: PrendaRopa)

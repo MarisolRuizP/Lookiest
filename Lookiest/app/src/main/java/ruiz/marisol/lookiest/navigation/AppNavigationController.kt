@@ -50,7 +50,7 @@ sealed class Screen(val route: String) {
         fun createRoute(prendaId: Int) = "editar_prenda/$prendaId"
     }
     object DetallesOutfit : Screen("detalles_outfit/{outfitId}") {
-        fun createRoute(outfitId: Int) = "detalles_outfit/$outfitId"
+        fun createRoute(outfitId: String) = "detalles_outfit/$outfitId"
     }
     object EditarOutfit : Screen("editar_outfit/{outfitId}") {
         fun createRoute(outfitId: Int) = "editar_outfit/$outfitId"
@@ -65,6 +65,7 @@ fun AppNavigation(
     val navController = rememberNavController()
     val prendas by closetViewModel.prendas.collectAsState()
     val outfits by closetViewModel.outfits.collectAsState()
+    val outfitsPublicos by closetViewModel.outfitsPublicos.collectAsState()
 
     NavHost(
         navController    = navController,
@@ -155,7 +156,8 @@ fun AppNavigation(
                 viewModel     = closetViewModel,
                 navController = navController,
                 onOutfitClick = { outfit ->
-                    navController.navigate(Screen.DetallesOutfit.createRoute(outfit.id))
+                    val identifier = outfit.firestoreId.ifEmpty { outfit.id.toString() }
+                    navController.navigate(Screen.DetallesOutfit.createRoute(identifier))
                 },
                 onNuevoOutfit = {
                     navController.navigate(Screen.CrearOutfit.route)
@@ -176,10 +178,12 @@ fun AppNavigation(
         // Detalles outfit
         composable(
             route     = Screen.DetallesOutfit.route,
-            arguments = listOf(navArgument("outfitId") { type = NavType.IntType })
+            arguments = listOf(navArgument("outfitId") { type = NavType.StringType })
         ) { back ->
-            val outfitId = back.arguments?.getInt("outfitId") ?: return@composable
-            val outfit   = outfits.find { it.id == outfitId } ?: return@composable
+            val outfitId = back.arguments?.getString("outfitId") ?: return@composable
+            val outfit = outfits.find { (it.firestoreId.ifEmpty { it.id.toString() }) == outfitId }
+                ?: outfitsPublicos.find { (it.firestoreId.ifEmpty { it.id.toString() }) == outfitId }
+                ?: return@composable
 
             DetalleOutfitScreen(
                 outfit        = outfit,
@@ -187,7 +191,7 @@ fun AppNavigation(
                 navController = navController,
                 onBack        = { navController.popBackStack() },
                 onEditar      = {
-                    navController.navigate(Screen.EditarOutfit.createRoute(outfitId))
+                    navController.navigate(Screen.EditarOutfit.createRoute(outfit.id))
                 },
                 onEliminar    = {
                     closetViewModel.eliminarOutfit(outfit)
@@ -221,13 +225,12 @@ fun AppNavigation(
             )
         }
 
-        // Perfil
         composable(Screen.Perfil.route) {
             PerfilScreen(
                 viewModel             = authViewModel,
                 onNavigateToEdit      = { navController.navigate(Screen.EditarPerfil.route) },
                 navController = navController,
-                onNavigateToChangePass = { navController.navigate("${Screen.CambiarContra.route}/false") },
+                onNavigateToChangePass = { navController.navigate(Screen.CambiarContra.route) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) { popUpTo(0) }
                 }
@@ -241,13 +244,9 @@ fun AppNavigation(
             )
         }
 
-        composable("${Screen.CambiarContra.route}/{esOlvido}") { backStackEntry ->
-            val esOlvido = backStackEntry.arguments?.getString("esOlvido")?.toBoolean() ?: false
-
+        composable(Screen.CambiarContra.route) {
             CambiarContraScreen(
                 viewModel = authViewModel,
-                esOlvido = esOlvido,
-                onNavigateToHome = {navController.navigate(Screen.MiCloset.route)},
                 onNavigateBack = { navController.popBackStack() }
             )
         }

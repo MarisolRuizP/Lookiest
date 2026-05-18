@@ -254,11 +254,13 @@ fun PrendaSeleccionableCard(
                             modifier           = Modifier.fillMaxSize(),
                             contentScale       = ContentScale.Fit
                         )
-                    } else {
+                    }
+                    
+                    if (prenda.imagen.isNullOrEmpty()) {
                         Icon(
                             Icons.Default.Checkroom,
                             contentDescription = null,
-                            tint     = MaterialTheme.colorScheme.onSurface,
+                            tint     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                             modifier = Modifier.size(40.dp)
                         )
                     }

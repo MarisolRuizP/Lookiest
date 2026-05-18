@@ -17,7 +17,7 @@ interface UsoOutfitDao {
     suspend fun obtenerPorFecha(email: String, fecha: String): List<UsoOutfit>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertar(uso: UsoOutfit)
+    suspend fun insertar(uso: UsoOutfit): Long
 
     @Delete
     suspend fun eliminar(uso: UsoOutfit)

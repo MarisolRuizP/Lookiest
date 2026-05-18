@@ -21,7 +21,7 @@ interface OutfitDao {
     fun obtenerOutfitDeHoy(email: String): Flow<Outfit?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertarOutfit(outfit: Outfit)
+    suspend fun insertarOutfit(outfit: Outfit): Long
 
     @Update
     suspend fun actualizarOutfit(outfit: Outfit)

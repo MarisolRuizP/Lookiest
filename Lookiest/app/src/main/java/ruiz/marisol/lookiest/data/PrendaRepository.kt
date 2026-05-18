@@ -28,8 +28,10 @@ class PrendaRepository(
         prendaDao.obtenerPrendaPorId(id)
 
     suspend fun guardarPrenda(prenda: PrendaRopa) {
-        prendaDao.insertarPrenda(prenda)
-        if (hayInternet()) subirAFirestore(prenda)
+        val id = prendaDao.insertarPrenda(prenda)
+        if (hayInternet()) {
+            subirAFirestore(prenda.copy(id = id.toInt()))
+        }
     }
 
     suspend fun actualizarPrenda(prenda: PrendaRopa) {

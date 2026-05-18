@@ -66,13 +66,16 @@ fun PrendaCard(
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        error = painterResource(id = ruiz.marisol.lookiest.R.drawable.ic_launcher_background)
                     )
-                } else {
+                } 
+                
+                if (prenda.imagen.isNullOrEmpty()) {
                     Icon(
                         imageVector = Icons.Default.Checkroom,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
                         modifier = Modifier
                             .size(64.dp)
                             .align(Alignment.Center)

@@ -61,7 +61,7 @@ fun OutfitsScreen(
     var busqueda by remember { mutableStateOf("") }
 
     val misOutfits = outfits.filter { it.creadoPor == viewModel.usuarioActualEmail }
-    val explorar = outfitsPublicos
+    val explorar = outfitsPublicos.filter { it.creadoPor != viewModel.usuarioActualEmail }
     val listaActual = if (tabSeleccionado == 0) misOutfits else explorar
 
     val listaFiltrada = remember(busqueda, listaActual) {
@@ -215,7 +215,6 @@ fun OutfitRow(
                 .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Miniaturas
             Row(
                 modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -224,23 +223,10 @@ fun OutfitRow(
                 prendasDelOutfit.take(5).forEach { prenda ->
                     PrendaMiniatura(prenda)
                 }
-                // Placeholder si el outfit no tiene prendas aún
-                if (outfit.prendas.isEmpty()) {
-                    repeat(5) {
-                        Box(
-                            modifier = Modifier
-                                .size(58.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.background),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Checkroom,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
+                val faltantes = 5 - prendasDelOutfit.size
+                if (faltantes > 0) {
+                    repeat(faltantes) {
+                        PlaceholderMiniatura()
                     }
                 }
             }
@@ -258,7 +244,10 @@ fun OutfitRow(
 @Composable
 fun PrendaMiniatura(prenda: PrendaRopa) {
     Box(
-        modifier = Modifier.size(58.dp),
+        modifier = Modifier
+            .size(58.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         if (!prenda.imagen.isNullOrEmpty()) {
@@ -273,9 +262,27 @@ fun PrendaMiniatura(prenda: PrendaRopa) {
                 imageVector = Icons.Default.Checkroom,
                 contentDescription = prenda.nombre,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                modifier = Modifier.size(38.dp)
+                modifier = Modifier.size(28.dp)
             )
         }
+    }
+}
+
+@Composable
+fun PlaceholderMiniatura() {
+    Box(
+        modifier = Modifier
+            .size(58.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Checkroom,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+            modifier = Modifier.size(24.dp)
+        )
     }
 }
 

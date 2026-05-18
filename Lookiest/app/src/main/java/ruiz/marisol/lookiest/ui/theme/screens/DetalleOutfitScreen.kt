@@ -52,7 +52,7 @@ fun DetalleOutfitScreen(
     navController: NavController
 
 ) {
-
+    val esPropio = outfit.creadoPor == viewModel.usuarioActualEmail || outfit.creadoPor == "Mi"
     val todasLasPrendas by viewModel.prendas.collectAsState(initial = emptyList())
 
     val idsPrendasOutfit = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
@@ -227,24 +227,26 @@ fun DetalleOutfitScreen(
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier              = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Button(
-                        onClick  = { mostrarDialogoEliminar = true },
-                        colors   = ButtonDefaults.buttonColors(containerColor = Rosa),
-                        shape    = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f).height(48.dp)
-                    ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+                if (esPropio) {
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = { mostrarDialogoEliminar = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = Rosa),
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier.weight(1f).height(48.dp)
+                        ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
 
-                    Button(
-                        onClick  = onEditar,
-                        colors   = ButtonDefaults.buttonColors(containerColor = Amarillo),
-                        shape    = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f).height(48.dp)
-                    ) { Text("Editar", fontWeight = FontWeight.Bold) }
+                        Button(
+                            onClick = onEditar,
+                            colors = ButtonDefaults.buttonColors(containerColor = Amarillo),
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier.weight(1f).height(48.dp)
+                        ) { Text("Editar", fontWeight = FontWeight.Bold) }
+                    }
                 }
                 Spacer(Modifier.height(20.dp))
             }
@@ -274,19 +276,21 @@ fun PrendaDetalleRow(prenda: PrendaRopa) {
                     .background(MaterialTheme.colorScheme.background),
                 contentAlignment = Alignment.Center
             ) {
-
                 if (!prenda.imagen.isNullOrEmpty()) {
                     AsyncImage(
                         model = prenda.imagen,
                         contentDescription = prenda.nombre,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(id = ruiz.marisol.lookiest.R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = ruiz.marisol.lookiest.R.drawable.ic_launcher_foreground)
                     )
-                } else {
+                }
+                if (prenda.imagen.isNullOrEmpty()) {
                     Icon(
                         imageVector = Icons.Default.Checkroom,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                         modifier = Modifier.size(44.dp)
                     )
                 }

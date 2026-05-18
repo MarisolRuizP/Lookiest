@@ -47,6 +47,26 @@ fun DetallesPrendaScreen(
 ) {
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
+    // los cosos de usos pq estaban harcodeadas jej
+    val usos by viewModel.usos.collectAsState()
+    val usosDeEstaPrenda = usos.filter { it.oufitId == prenda.id }
+    val totalUsos = usosDeEstaPrenda.size
+
+    val promedioMensual = if (usosDeEstaPrenda.isEmpty()) 0 else {
+        try {
+            val fechas = usosDeEstaPrenda.map { java.time.LocalDate.parse(it.fecha) }.sorted()
+            val primera = fechas.first()
+            val hoy = java.time.LocalDate.now()
+            val meses = java.time.temporal.ChronoUnit.MONTHS.between(
+                primera.withDayOfMonth(1),
+                hoy.withDayOfMonth(1)
+            ) + 1
+            (totalUsos / meses.toDouble()).toInt().coerceAtLeast(1)
+        } catch (e: Exception) {
+            1
+        }
+    }
+
     if (mostrarDialogoEliminar) {
         ConfirmacionDialog(
             mensaje = "¿Deseas eliminar esta prenda?",
@@ -116,7 +136,6 @@ fun DetallesPrendaScreen(
                     }
 
                     IconButton(
-                        // Pasamos el objeto completo para cambiar el favorito en Room
                         onClick = { viewModel.favorito(prenda) },
                         modifier = Modifier.align(Alignment.TopEnd)
                     ) {
@@ -200,9 +219,9 @@ fun DetallesPrendaScreen(
 
             Spacer(Modifier.height(30.dp))
 
-            EstadisticaRow(label = "Total de usos", valor = 15)
+            EstadisticaRow(label = "Total de usos", valor = totalUsos)
             Spacer(Modifier.height(6.dp))
-            EstadisticaRow(label = "Promedio mensual", valor = 3)
+            EstadisticaRow(label = "Promedio mensual", valor = promedioMensual)
 
             Spacer(Modifier.height(30.dp))
 

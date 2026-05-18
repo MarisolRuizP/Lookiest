@@ -264,11 +264,13 @@ fun CalendarioScreen(
                                             .fillMaxSize()
                                             .padding(6.dp)
                                     )
-                                } else {
+                                }
+                                
+                                if (prenda.imagen.isNullOrEmpty()) {
                                     Icon(
                                         imageVector = Icons.Default.Checkroom,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                                         modifier = Modifier.size(32.dp)
                                     )
                                 }

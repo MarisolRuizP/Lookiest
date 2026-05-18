@@ -44,8 +44,10 @@ class OutfitRepository(
         outfitDao.obtenerOutfitDeHoy(email)
 
     suspend fun guardarOutfit(outfit: Outfit) {
-        outfitDao.insertarOutfit(outfit)
-        if (hayInternet()) subirAFirestore(outfit)
+        val id = outfitDao.insertarOutfit(outfit)
+        if (hayInternet()) {
+            subirAFirestore(outfit.copy(id = id.toInt()))
+        }
     }
 
     suspend fun actualizarOutfit(outfit: Outfit) {

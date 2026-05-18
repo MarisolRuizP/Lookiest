@@ -1,39 +1,13 @@
 package ruiz.marisol.lookiest.ui.theme.screens
 
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,11 +28,8 @@ import ruiz.marisol.lookiest.viewModel.AuthViewModel
 @Composable
 fun CambiarContraScreen(
     viewModel: AuthViewModel,
-    esOlvido: Boolean,
-    onNavigateBack: () -> Unit,
-    onNavigateToHome: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
-    val passGuardada by viewModel.password.collectAsState()
     val context = LocalContext.current
 
     var passAnterior by remember { mutableStateOf("") }
@@ -69,7 +40,6 @@ fun CambiarContraScreen(
     var visible2 by remember { mutableStateOf(false) }
     var visible3 by remember { mutableStateOf(false) }
 
-    // Cambiado: Ahora escuchamos a currentUser de Firebase
     val currentUser by viewModel.currentUser.collectAsState()
     val biometriaActiva by viewModel.biometriaHabilitada.collectAsState()
 
@@ -102,7 +72,6 @@ fun CambiarContraScreen(
 
             Box(contentAlignment = Alignment.BottomEnd) {
                 AsyncImage(
-                    // Cambiado: Leemos photoUrl de FirebaseUser
                     model = currentUser?.photoUrl,
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
@@ -116,24 +85,23 @@ fun CambiarContraScreen(
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-            if (!esOlvido) {
-                CampoContra(
-                    label = "Contraseña Anterior",
-                    value = passAnterior,
-                    onValueChange = { passAnterior = it },
-                    isVisible = visible1,
-                    onToggleVisibility = {
-                        if (biometriaActiva) {
-                            biometricHelper.lanzarBiometria(
-                                onSuccess = { visible1 = !visible1 },
-                                onError = { Toast.makeText(context, "Error: $it", Toast.LENGTH_SHORT).show() }
-                            )
-                        } else {
-                            Toast.makeText(context, "Activa la biometría para ver este campo", Toast.LENGTH_LONG).show()
-                        }
+
+            CampoContra(
+                label = "Contraseña Anterior",
+                value = passAnterior,
+                onValueChange = { passAnterior = it },
+                isVisible = visible1,
+                onToggleVisibility = {
+                    if (biometriaActiva) {
+                        biometricHelper.lanzarBiometria(
+                            onSuccess = { visible1 = !visible1 },
+                            onError = { Toast.makeText(context, "Error: $it", Toast.LENGTH_SHORT).show() }
+                        )
+                    } else {
+                        Toast.makeText(context, "Activa la biometría para ver este campo", Toast.LENGTH_LONG).show()
                     }
-                )
-            }
+                }
+            )
 
             CampoContra(
                 label = "Contraseña Nueva",
@@ -168,22 +136,19 @@ fun CambiarContraScreen(
 
                 Button(
                     onClick = {
-                        val anteriorCorrecta = esOlvido || passAnterior == passGuardada
-
-                        if (!anteriorCorrecta) {
-                            Toast.makeText(context, "La contraseña anterior no coincide", Toast.LENGTH_SHORT).show()
+                        if (passAnterior.isEmpty()) {
+                            Toast.makeText(context, "Escribe tu contraseña actual", Toast.LENGTH_SHORT).show()
                         } else if (passNueva != passConfirmar) {
                             Toast.makeText(context, "Las nuevas contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-                        } else if (passNueva.isEmpty()) {
-                            Toast.makeText(context, "Escribe una nueva contraseña", Toast.LENGTH_SHORT).show()
+                        } else if (passNueva.length < 6) {
+                            Toast.makeText(context, "La nueva contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show()
                         } else {
-                            // Cambiado: Usamos el callback de tu nueva función de ViewModel
-                            viewModel.updatePassword(passNueva) { exito ->
+                            viewModel.updatePassword(passNueva, passAnterior) { exito ->
                                 if (exito) {
                                     Toast.makeText(context, "¡Contraseña actualizada!", Toast.LENGTH_SHORT).show()
-                                    if(esOlvido) onNavigateToHome() else onNavigateBack()
+                                    onNavigateBack()
                                 } else {
-                                    Toast.makeText(context, "Error al actualizar contraseña", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Error: Contraseña actual incorrecta o error de red", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
