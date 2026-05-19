@@ -28,6 +28,7 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         CloudinaryManager.init(applicationContext)
+        authViewModel.initPrefs(this)
 
         val database = LookiestDatabase.getDatabase(applicationContext)
 

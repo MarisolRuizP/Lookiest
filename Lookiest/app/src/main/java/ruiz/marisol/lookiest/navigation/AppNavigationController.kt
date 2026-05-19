@@ -74,8 +74,9 @@ fun AppNavigation(
         // Login
         composable(Screen.Login.route) {
             LoginScreen(
-                viewModel            = authViewModel,
-                onNavigateToRegister = { navController.navigate(Screen.Registro.route) },
+                viewModel              = authViewModel,
+                onNavigateToForgetPass = { navController.navigate(Screen.CambiarContra.route) },
+                onNavigateToRegister   = { navController.navigate(Screen.Registro.route) },
                 onLoginSuccess = {
                     navController.navigate(Screen.MiCloset.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }

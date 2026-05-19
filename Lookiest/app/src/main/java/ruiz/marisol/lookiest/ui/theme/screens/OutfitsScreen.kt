@@ -200,7 +200,7 @@ fun OutfitRow(
 ) {
     val idsPrendas = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
     val prendasDelOutfit = todasLasPrendas.filter { it.id in idsPrendas }
-    
+
     val imagenesAMostrar = if (prendasDelOutfit.isNotEmpty()) {
         prendasDelOutfit.take(5).map { it.imagen ?: "" }
     } else {

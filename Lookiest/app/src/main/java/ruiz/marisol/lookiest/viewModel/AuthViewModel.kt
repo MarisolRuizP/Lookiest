@@ -14,39 +14,69 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.io.InputStream
+import android.content.SharedPreferences
 
 class AuthViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
-    // Usuario actual
+    private var prefs: SharedPreferences? = null
     private val _currentUser = MutableStateFlow<FirebaseUser?>(auth.currentUser)
     val currentUser: StateFlow<FirebaseUser?> = _currentUser.asStateFlow()
-
-    val isLoggedIn: Boolean get() = auth.currentUser != null
-
-    val username: StateFlow<String>
-        get() = MutableStateFlow(auth.currentUser?.email ?: "")
-
-    // Estados de UI
+    private val _isLoggedIn = MutableStateFlow(auth.currentUser != null)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+    private val _username = MutableStateFlow(auth.currentUser?.email ?: "")
+    val username: StateFlow<String> = _username.asStateFlow()
+    private val _biometriaHabilitada = MutableStateFlow(false)
+    val biometriaHabilitada: StateFlow<Boolean> = _biometriaHabilitada.asStateFlow()
+    private val _isDarkMode = MutableStateFlow(false)
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    private val _isDarkMode = MutableStateFlow(false)
-    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+    val password: StateFlow<String> = MutableStateFlow("")
 
-    private val _biometriaHabilitada = MutableStateFlow(false)
-    val biometriaHabilitada: StateFlow<Boolean> = _biometriaHabilitada.asStateFlow()
+    fun initPrefs(context: Context) {
+        prefs = context.getSharedPreferences("lookiest_prefs", Context.MODE_PRIVATE)
+        // Al inicializar carga el valor guardado del usuario actual
+        val email = auth.currentUser?.email ?: ""
+        if (email.isNotEmpty()) {
+            _biometriaHabilitada.value = prefs!!.getBoolean("biometria_$email", false)
+        }
+    }
 
-    // Registro
+    fun verificarBiometria(email: String) {
+        _biometriaHabilitada.value = prefs?.getBoolean("biometria_$email", false) ?: false
+    }
 
-    /**
-     * Registra un nuevo usuario con correo y contraseña en Firebase.
-     */
+    fun loginConBiometria(onResult: (Boolean) -> Unit) {
+        val user = auth.currentUser
+        if (user != null) {
+            _currentUser.value = user
+            _isLoggedIn.value  = true
+            _username.value    = user.email ?: ""
+            onResult(true)
+        } else {
+            onResult(false)
+        }
+    }
+
+    fun verificarSiExiste(email: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val result = auth.fetchSignInMethodsForEmail(email).await()
+                onResult(!result.signInMethods.isNullOrEmpty())
+            } catch (e: Exception) {
+                onResult(false)
+            }
+        }
+    }
+
+    fun cargarDatosUsuario(email: String) {
+        _username.value = email
+    }
+
     fun registrar(
         email: String,
         password: String,
@@ -63,18 +93,14 @@ class AuthViewModel : ViewModel() {
             _isLoading.value = true
             _errorMessage.value = null
             try {
-                // Crea el usuario en Firebase
                 val resultado = auth.createUserWithEmailAndPassword(email, password).await()
-
-                // Guarda el nombre de usuario en el perfil de Firebase
                 if (displayName.isNotBlank()) {
-                    val profileUpdates = userProfileChangeRequest {
-                        this.displayName = displayName
-                    }
+                    val profileUpdates = userProfileChangeRequest { this.displayName = displayName }
                     resultado.user?.updateProfile(profileUpdates)?.await()
                 }
-
                 _currentUser.value = auth.currentUser
+                _isLoggedIn.value  = true
+                _username.value    = auth.currentUser?.email ?: ""
                 onSuccess()
             } catch (e: Exception) {
                 val msg = mensajeDeError(e)
@@ -86,10 +112,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-
-    /**
-     * Inicia sesión con correo y contraseña en Firebase.
-     */
     fun login(
         email: String,
         password: String,
@@ -106,6 +128,8 @@ class AuthViewModel : ViewModel() {
             try {
                 auth.signInWithEmailAndPassword(email, password).await()
                 _currentUser.value = auth.currentUser
+                _isLoggedIn.value  = true
+                _username.value    = auth.currentUser?.email ?: ""
                 onResult(true)
             } catch (e: Exception) {
                 _errorMessage.value = "Usuario y/o contraseña incorrectos"
@@ -118,20 +142,23 @@ class AuthViewModel : ViewModel() {
 
     fun logout() {
         auth.signOut()
-        _currentUser.value = null
-        _errorMessage.value = null
+        _currentUser.value      = null
+        _isLoggedIn.value       = false
+        _username.value         = ""
+        _biometriaHabilitada.value = false
+        _errorMessage.value     = null
     }
 
-
-    fun updateProfile(nuevoNombre: String, nuevoCorreo: String, onResult: (Boolean) -> Unit = {}) {
+    fun updateProfile(
+        nuevoNombre: String,
+        nuevoCorreo: String,
+        onResult: (Boolean) -> Unit = {}
+    ) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val profileUpdates = userProfileChangeRequest {
-                    displayName = nuevoNombre
-                }
+                val profileUpdates = userProfileChangeRequest { displayName = nuevoNombre }
                 auth.currentUser?.updateProfile(profileUpdates)?.await()
-
                 if (nuevoCorreo != auth.currentUser?.email) {
                     auth.currentUser?.verifyBeforeUpdateEmail(nuevoCorreo)?.await()
                 }
@@ -146,7 +173,11 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun updatePassword(nuevaPass: String, passAnterior: String = "", onResult: (Boolean) -> Unit = {}) {
+    fun updatePassword(
+        nuevaPass: String,
+        passAnterior: String = "",
+        onResult: (Boolean) -> Unit = {}
+    ) {
         val user = auth.currentUser ?: return onResult(false)
         viewModelScope.launch {
             _isLoading.value = true
@@ -166,6 +197,45 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun subirFoto(fileUri: Uri, context: Context, onResult: (Boolean) -> Unit) {
+        val user = auth.currentUser ?: return onResult(false)
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setPhotoUri(fileUri)
+                    .build()
+                user.updateProfile(profileUpdates).await()
+                auth.currentUser?.reload()?.await()
+                _currentUser.value = auth.currentUser
+                onResult(true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult(false)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun cambiarBiometriaFirebase(nuevoEstado: Boolean) {
+        viewModelScope.launch {
+            val email = auth.currentUser?.email ?: ""
+            if (email.isNotEmpty()) {
+                _biometriaHabilitada.value = nuevoEstado
+                prefs?.edit()?.putBoolean("biometria_$email", nuevoEstado)?.apply()
+            }
+        }
+    }
+
+    fun cambiarTemaFirebase(estadoActual: Boolean) {
+        viewModelScope.launch {
+            if (auth.currentUser?.email?.isNotEmpty() == true) {
+                _isDarkMode.value = !estadoActual
+            }
+        }
+    }
+
     fun limpiarError() {
         _errorMessage.value = null
     }
@@ -177,51 +247,5 @@ class AuthViewModel : ViewModel() {
         e.message?.contains("no user record")    == true -> "No existe una cuenta con ese correo"
         e.message?.contains("password is wrong") == true -> "Contraseña incorrecta"
         else -> "Error: ${e.message}"
-    }
-
-    val password: StateFlow<String> = MutableStateFlow("")
-
-    fun cambiarBiometriaFirebase(nuevoEstado: Boolean) {
-        viewModelScope.launch {
-            val email = auth.currentUser?.email ?: ""
-            if (email.isNotEmpty()) {
-                _biometriaHabilitada.value = nuevoEstado
-            }
-        }
-    }
-
-    fun cambiarTemaFirebase(estadoActual: Boolean) {
-        viewModelScope.launch {
-            val email = auth.currentUser?.email ?: ""
-            if (email.isNotEmpty()) {
-                val nuevoModo = !estadoActual
-                _isDarkMode.value = nuevoModo
-            }
-        }
-    }
-
-    fun subirFoto(fileUri: Uri, context: Context, onResult: (Boolean) -> Unit) {
-        val user = auth.currentUser ?: return onResult(false)
-        _isLoading.value = true
-
-        viewModelScope.launch {
-            try {
-                val profileUpdates = UserProfileChangeRequest.Builder()
-                    .setPhotoUri(fileUri)
-                    .build()
-
-                user.updateProfile(profileUpdates).await()
-
-                auth.currentUser?.reload()?.await()
-                _currentUser.value = auth.currentUser
-
-                onResult(true)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                onResult(false)
-            } finally {
-                _isLoading.value = false
-            }
-        }
     }
 }
