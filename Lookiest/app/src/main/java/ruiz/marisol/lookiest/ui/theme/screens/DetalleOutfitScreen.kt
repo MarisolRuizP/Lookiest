@@ -54,7 +54,7 @@ fun DetalleOutfitScreen(
 ) {
     val esPropio = outfit.creadoPor == viewModel.usuarioActualEmail || outfit.creadoPor == "Mi"
     val todasLasPrendas by viewModel.prendas.collectAsState(initial = emptyList())
-    
+
     val idsPrendasOutfit = outfit.prendas.split(",").mapNotNull { it.trim().toIntOrNull() }
     val prendasDelOutfit = todasLasPrendas.filter { it.id in idsPrendasOutfit }
     val esDeOtroUsuario = prendasDelOutfit.isEmpty() && outfit.imagenesUrls.isNotEmpty()
@@ -159,9 +159,10 @@ fun DetalleOutfitScreen(
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         IconButton(
-                            onClick  = {
+                            onClick = {
                                 liked = !liked
-                                likes = if (liked) likes + 1 else likes - 1
+                                likes = if (liked) (outfit.likes ?: 0) + 1 else (outfit.likes ?: 0)
+                                viewModel.toggleLike(outfit.copy(likes = likes, favoritos = favCount), liked)
                             },
                             modifier = Modifier.size(36.dp)
                         ) {
@@ -185,9 +186,10 @@ fun DetalleOutfitScreen(
                         modifier = Modifier.padding(start = 4.dp)
                     ) {
                         IconButton(
-                            onClick  = {
+                            onClick = {
                                 favorito = !favorito
-                                favCount = if (favorito) favCount + 1 else favCount - 1
+                                favCount = if (favorito) (outfit.favoritos ?: 0) + 1 else (outfit.favoritos ?: 0)
+                                viewModel.toggleFavoritoOutfit(outfit.copy(likes = likes, favoritos = favCount), favorito)
                             },
                             modifier = Modifier.size(36.dp)
                         ) {

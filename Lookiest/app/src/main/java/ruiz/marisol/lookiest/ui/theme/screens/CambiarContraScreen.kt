@@ -94,7 +94,9 @@ fun CambiarContraScreen(
                 onToggleVisibility = {
                     if (biometriaActiva) {
                         biometricHelper.lanzarBiometria(
-                            onSuccess = { visible1 = !visible1 },
+                            onSuccess = {
+                                visible1 = !visible1  // esto ya debería funcionar
+                            },
                             onError = { Toast.makeText(context, "Error: $it", Toast.LENGTH_SHORT).show() }
                         )
                     } else {

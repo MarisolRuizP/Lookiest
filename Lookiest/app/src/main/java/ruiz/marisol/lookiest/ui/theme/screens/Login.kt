@@ -35,7 +35,6 @@ import ruiz.marisol.lookiest.viewModel.AuthViewModel
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
-    onNavigateToForgetPass: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
@@ -109,7 +108,7 @@ fun LoginScreen(
             )
 
             Spacer(Modifier.height(60.dp))
-            
+
             if (!isRegistered) {
                 Text(
                     modifier   = Modifier.align(Alignment.Start),
@@ -181,35 +180,6 @@ fun LoginScreen(
                     modifier  = Modifier.fillMaxWidth()
                 )
             }
-
-            Spacer(Modifier.height(20.dp))
-
-            Text(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .clickable {
-                        val usuarioAValidar = if (isRegistered) userName else email
-                        if (usuarioAValidar.isBlank()) {
-                            Toast.makeText(context, "Ingresa tu usuario", Toast.LENGTH_SHORT).show()
-                        } else {
-                            viewModel.verificarSiExiste(usuarioAValidar) { existe ->
-                                if (existe) {
-                                    viewModel.cargarDatosUsuario(usuarioAValidar)
-                                    onNavigateToForgetPass()
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "El usuario '$usuarioAValidar' no está registrado",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        }
-                    },
-                fontSize = 12.sp,
-                color    = MaterialTheme.colorScheme.onSurface,
-                text     = "Olvidaste tu contraseña?"
-            )
 
             Spacer(Modifier.height(20.dp))
 

@@ -35,6 +35,8 @@ class OutfitRepository(
                         esPublico     = true,
                         etiquetas     = doc.getString("etiquetas") ?: "",
                         creadoPor     = doc.getString("creadoPor") ?: "",
+                        likes        = (doc.getLong("likes") ?: 0).toInt(),
+                        favoritos    = (doc.getLong("favoritos") ?: 0).toInt(),
                         imagenesUrls  = (doc.get("imagenesUrls") as? List<*>)
                             ?.filterIsInstance<String>() ?: emptyList()
                     )
@@ -110,7 +112,9 @@ class OutfitRepository(
                 "etiquetas"     to outfit.etiquetas,
                 "totalUsos"     to outfit.totalUsos,
                 "esOutfitDeHoy" to outfit.esOutfitDeHoy,
-                "imagenesUrls"  to outfit.imagenesUrls  // ← nuevo
+                "imagenesUrls"  to outfit.imagenesUrls,
+                "likes"         to (outfit.likes ?: 0),
+                "favoritos"     to (outfit.favoritos ?: 0)
             )
             outfitsRef.document(outfit.firestoreId).update(data).await()
         } catch (e: Exception) { }
@@ -121,5 +125,16 @@ class OutfitRepository(
         val network = cm.activeNetwork ?: return false
         val caps = cm.getNetworkCapabilities(network) ?: return false
         return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    suspend fun actualizarLikesFirestore(firestoreId: String, likes: Int, favoritos: Int) {
+        try {
+            outfitsRef.document(firestoreId).update(
+                mapOf(
+                    "likes"     to likes,
+                    "favoritos" to favoritos
+                )
+            ).await()
+        } catch (e: Exception) { }
     }
 }

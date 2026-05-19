@@ -169,4 +169,24 @@ class ClosetViewModel(
             .map { it.oufitId }
         return prendas.value.filter { it.id in prendaIds }
     }
+
+    fun toggleLike(outfit: Outfit, liked: Boolean) = viewModelScope.launch {
+        val nuevosLikes = if (liked) (outfit.likes ?: 0) + 1 else (outfit.likes ?: 0) - 1
+        val actualizado = outfit.copy(likes = nuevosLikes)
+        if (outfit.id != 0) {
+            outfitRepository.actualizarOutfit(actualizado)
+        } else if (outfit.firestoreId.isNotEmpty()) {
+            outfitRepository.actualizarLikesFirestore(outfit.firestoreId, nuevosLikes, outfit.favoritos ?: 0)
+        }
+    }
+
+    fun toggleFavoritoOutfit(outfit: Outfit, favorito: Boolean) = viewModelScope.launch {
+        val nuevosFavs = if (favorito) (outfit.favoritos ?: 0) + 1 else (outfit.favoritos ?: 0) - 1
+        val actualizado = outfit.copy(favoritos = nuevosFavs)
+        if (outfit.id != 0) {
+            outfitRepository.actualizarOutfit(actualizado)
+        } else if (outfit.firestoreId.isNotEmpty()) {
+            outfitRepository.actualizarLikesFirestore(outfit.firestoreId, outfit.likes ?: 0, nuevosFavs)
+        }
+    }
 }
